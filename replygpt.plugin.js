@@ -1,81 +1,96 @@
 /**
- * @name ReplyGPT
+ * @name _ReplyGPT - Autopilot for Discord
  * @author AlphaNeon
  * @description A plugin that replies to messages with the ChatGPT API
  * @version 0.0.1
  */
 
 const testArray = [
-    "RemoteUser: Hi",
-    "LocalUser: Hai~!",
-    "RemoteUser: How are you?",
-    "LocalUser: I'm doing great!~ ^w^",
-    "RemoteUser: That's good to hear- whatcha doing?",
-    "LocalUser: I'm just working on a Discord plugin!",
-    "RemoteUser: Oh, that's cool!",
+  "RemoteUser: Hi",
+  "LocalUser: Hai~!",
+  "RemoteUser: How are you?",
+  "LocalUser: I'm doing great!~ ^w^",
+  "RemoteUser: That's good to hear- whatcha doing?",
+  "LocalUser: I'm just working on a Discord plugin!",
+  "RemoteUser: Oh, that's cool!",
+  "LocalUser: Yeah, I'm really excited about it!",
+  "RemoteUser: Is something wrong..?- you seem a bit off.",
 ];
 
-const MessageStore = BdApi.Webpack.getStore('MessageStore');
-const UserMessageStore = BdApi.Webpack.getStore('UserProfileStore');
-const ChannelMessageStore = BdApi.Webpack.getStore('ChannelStore');
-   
 module.exports = class ReplyGPT {
-    constructor() {
-        this.MessagesArray = []
-        this.Settings = {
-            OpenAIKey: "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",
-            RandomDelayMin: 1,
-            RandomDelayMax: 10,
-            RandomDelayEnabled: true,
-            CustomPrompt: "PROMPT_HERE",
-            UseCustomPrompt: false,
-        };
+  constructor() {
+    this.MessageStore = ZeresPluginLibrary.WebpackModules.getByProps(
+      "getMessages",
+      "getMessage"
+    );
+
+    this.ChannelStore = ZeresPluginLibrary.WebpackModules.getByProps(
+      "getChannel",
+      "getDMFromUserId"
+    );
+
+    this.UserStore = ZeresPluginLibrary.WebpackModules.getByProps(
+      "getCurrentUser",
+      "getUser"
+    );
+
+    this.Settings = {
+      OpenAIKey: "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",
+      RandomDelayMin: 1,
+      RandomDelayMax: 10,
+      RandomDelayEnabled: true,
+      CustomPrompt: "PROMPT_HERE",
+      UseCustomPrompt: false,
+      MessagesToRead: 15,
+    };
+  }
+
+  start() {
+    this.MessagesArray = this.getMessagesArray(this.Settings.MessagesToRead); // fill it automatically to debug
+
+    this.Settings = BdApi.Data.load("ReplyGPT", "settings") || this.Settings;
+
+    // wait 5 seconds to call this
+    setTimeout(() => {
+      this.testing();
+    }, 5000);
+  }
+
+  stop() {
+    BdApi.Data.save("ReplyGPT", "settings", this.Settings);
+  }
+
+  async getReplyFromAI(inputMessagesArray) {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.Settings.OpenAIKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: this.DefaultPrompt(inputMessagesArray),
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    } else {
+      const jsonResp = await response.json();
+      return jsonResp["choices"][0]["message"]["content"];
     }
-  
-    start() {
-        this.getMessagesArray(); // Testing
-        this.MessagesArray = testArray;// DEBUG - Set the MessagesArray to a test array
-        console.log(this.MessagesArray);
+  }
 
-        this.Settings = BdApi.Data.load("ReplyGPT", "settings") || this.Settings;
-        this.getReplyFromAI(this.MessagesArray) // TODO: Implement message array passthrough
-        .then(response => console.log(response))
-        .catch(err => console.error(err));
-    }
+  DefaultPrompt(inputMessagesArray) {
+    // Assuming MessagesArray is a class property
+    // this.MessagesArray should be properly initialized before being used here.
 
-    stop() {
-        BdApi.Data.save("ReplyGPT", "settings", this.Settings);
-    }
-  
-    async getReplyFromAI(inputMessagesArray) {
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${this.Settings.OpenAIKey}`
-            },
-            body: JSON.stringify({
-                'model': 'gpt-3.5-turbo',
-                'messages': [
-                    {"role": "system", "content": this.DefaultPrompt(inputMessagesArray)},
-                    // {"role": "user", "content": userPrompt}
-                ]
-            })
-        });
-
-        if (!response.ok) {
-           throw new Error(`HTTP error! status: ${response.status}`);
-        } else {
-           const jsonResp = await response.json();
-           return jsonResp['choices'][0]['message']['content'];
-        }
-    }
-
-    DefaultPrompt (inputMessagesArray) {
-        // Assuming MessagesArray is a class property
-        // this.MessagesArray should be properly initialized before being used here. 
-
-        const output = `
+    const output = `
 You are a Discord Reply AI designed to automatically reply to messages 
 in the style of the user. You will be given the last 15 messages 
 between the local user (who you are replying as) and the remote 
@@ -85,7 +100,7 @@ to say anything that would give away that you are an AI.
 You are doing your best to be the user you are replying as.
 Do not reply in more than 1 sentence. Keep your answers short and generic.
 
-The following is the last 15 messages between the local user and 
+The following is the last few messages between the local user and 
 the remote user:
 
 ${inputMessagesArray.join("\n")}
@@ -101,25 +116,65 @@ ONLY respond in this format. Do not reply with anything but the
 json object.
 
         `;
-        return output;
+    console.log(output); // debug
+    return output;
+  }
+
+  /**
+   * Retrieves the messages from the current channel and formats them into an array.
+   * @returns {Array} An array of formatted messages.
+   */
+  getMessagesArray(numberOfMessages) {
+    let formattedMessageArray = [];
+    let messages = this.MessageStore.getMessages(
+      ZeresPluginLibrary.DiscordModules.SelectedChannelStore.getChannelId() // gets the current channel ID
+    );
+
+    let messageArray = messages._array;
+
+    // format the messages
+    for (let i = 0; i < numberOfMessages; i++) {
+      formattedMessageArray[
+        i
+        // messageArray[i].author.globalName is the display name
+      ] = `${this.getUserType(messageArray[i].author.username)}: ${
+        messageArray[i].content
+      }`;
     }
 
-    getMessagesArray() {
-        // use Betterdiscord's MessageStore to get the last 15 messages
-        // between the local user and the remote user
-        // and return them as an array of strings
-        
-        const messages = MessageStore.getMessages();
-        const messagesArray = [];
-        for (let i = 0; i < messages.length; i++) {
-            const message = messages[i];
-            const author = message.author.username;
-            const content = message.content;
-            messagesArray.push(`${author}: ${content}`);
-            console.log(`${author}: ${content}`)
-        }
-        // return messagesArray;
+    return formattedMessageArray;
+  }
+
+  getUserType(name) {
+    if (name === this.UserStore.getCurrentUser().username) {
+      return "LocalUser";
+    } else {
+      return "RemoteUser";
     }
+  }
+
+  async getGeneratedResponse() {
+    try {
+      const response = await this.getReplyFromAI(
+        this.MessagesArray
+      );
+      const responseObject = JSON.parse(response);
+      // Do something with the response object
+
+      return responseObject;
+    } catch (error) {
+      console.error("Error parsing response:", error);
+      // Retry? debug
+      throw error;
+    }
+  }
+
+  async testing() {
+    try {
+      const response = await this.getGeneratedResponse(15);
+      console.log(response);
+    } catch (error) {
+      console.error(error);
+    }
+  }
 };
-
-
