@@ -4,42 +4,20 @@
  * @description A plugin that replies to messages with the ChatGPT API
  * @version 0.0.1
  */
-// console.log("1")
-//     setTimeout(() => {
-//       setInterval(() => {
-//         console.log("2")
-//         let testMessage = this.getMessagesArray(1);
-//         console.log(3)
-//         let lastMessageUsername = this.extractUserNameFromMsg(testMessage[0]);
 
-//         if (this.UserStore.getCurrentUser().username == lastMessageUsername) {
-//           // last message was sent by the local user, don't reply
-//           console.log(this.UserStore.getCurrentUser().username);
-//           console.log(lastMessageUsername);
-//           console.log("Last message was sent by the local user, don't reply");
-//         } else {
-//           // last message was sent by the remote user, reply
-//           this.testing();
-//           console.log(this.UserStore.getCurrentUser().username);
-//           console.log(lastMessageUsername);
-//           console.log("Last message was sent by the remote user, reply");
-//         }
-//       }, 8000); // time before next check
-//     }, 5000);
-/*
-const testArray = [
-  "RemoteUser: Hi",
-  "LocalUser: Hai~!",
-  "RemoteUser: How are you?",
-  "LocalUser: I'm doing great!~ ^w^",
-  "RemoteUser: That's good to hear- whatcha doing?",
-  "LocalUser: I'm just working on a Discord plugin!",
-  "RemoteUser: Oh, that's cool!",
-  "LocalUser: Yeah, I'm really excited about it!",
-  "RemoteUser: Is something wrong..?- you seem a bit off.",
-];
-*/
-// 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
+const stripEmojis = (str) =>
+  str
+
+    .replace(
+      /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g,
+
+      ""
+    )
+
+    .replace(/\s+/g, " ")
+
+    .trim();
+
 module.exports = class ReplyGPT {
   constructor() {
     this.Settings = {
@@ -75,15 +53,15 @@ module.exports = class ReplyGPT {
 
   start() {
     this.Settings = BdApi.Data.load("ReplyGPT", "settings") || this.Settings;
-
-
+    // patchPanel();
     setInterval(() => {
-    this.testing();
+      this.testing();
     }, 13000); // time before next check
   }
 
   stop() {
     BdApi.Data.save("ReplyGPT", "settings", this.Settings);
+    BdApi.Patcher.unpatchAll("Plugin");
   }
 
   async getReplyFromAI(inputMessagesArray) {
@@ -252,3 +230,40 @@ json object.
     );
   }
 };
+
+// const { React } = BdApi;
+
+// const PanelButton = BdApi.Webpack.getModule(m => m.toString?.().includes(".Masks.PANEL_BUTTON"));
+
+// function AutoPilotButton() {
+//   const [ checked, setChecked ] = React.useState(false);
+
+//   return React.createElement(PanelButton, {
+//     ariaChecked: checked,
+//     ariaLabel: checked ? "Checked" : "Unchecked",
+//     disabled: false,
+//     icon: (props) => React.createElement("div", props, checked.toString()),
+//     iconForeground: "",
+//     innerClassName: "",
+//     onClick: () => setChecked(!checked),
+//     role: "switch",
+//     tooltipText: checked ? "Checked" : "Unchecked"
+//   });
+// };
+
+// function patchPanel() {
+//   const node = document.querySelector("title-31SJ6t > .toolbar-3_r2xA > .container-ZMc96U");
+//   if (!node) {
+//     console.log("no node");
+//     return;
+//   }
+//   console.log("node found, patching")
+//   const instance = BdApi.ReactUtils.getOwnerInstance(node);
+//   if (!instance) return;
+//   BdApi.Patcher.after("Plugin", instance, "render", (that, args, res) => {
+//     const flex = BdApi.Utils.findInTree(res, m => m?.children && m.shrink, { walkable: [ "children", "props" ] });
+//     flex.children.unshift(React.createElement(AutoPilotButton));
+//   });
+//   instance.forceUpdate();
+// };
+
