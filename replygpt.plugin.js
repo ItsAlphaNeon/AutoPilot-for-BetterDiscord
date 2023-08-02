@@ -1,5 +1,5 @@
 /**
- * @name _ReplyGPT - Autopilot for Discord
+ * @name Autopilot
  * @author AlphaNeon
  * @description A plugin that replies to messages with the ChatGPT API
  * @version 0.0.1
@@ -18,10 +18,11 @@ const stripEmojis = (str) =>
 
     .trim();
 
-module.exports = class ReplyGPT {
+module.exports = class Autopilot {
   constructor() {
+    // Default settings
     this.Settings = {
-      OpenAIKey: "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",
+      OpenAIKey: "OPENAI_KEY_HERE",
       RandomDelayMin: 1,
       RandomDelayMax: 10,
       RandomDelayEnabled: true,
@@ -52,19 +53,32 @@ module.exports = class ReplyGPT {
   }
 
   start() {
-    this.Settings = BdApi.Data.load("ReplyGPT", "settings") || this.Settings;
-    // patchPanel();
-    setInterval(() => {
-      this.testing();
-    }, 13000); // time before next check
+    this.loadSettings();
+    if (this.Settings.OpenAIKey === "OPENAI_KEY_HERE") {
+      BdApi.alert(
+        "Autopilot",
+        "Please enter your OpenAI key in the settings panel."
+      );
+    }
+    
+    // Uncomment the below code to test the plugin
+
+    // setInterval(() => {
+    //   this.testing();
+    // }, 13000); // time before next check
   }
 
   stop() {
-    BdApi.Data.save("ReplyGPT", "settings", this.Settings);
-    BdApi.Patcher.unpatchAll("Plugin");
+    this.saveSettings();
   }
 
   async getReplyFromAI(inputMessagesArray) {
+    let prompt = "";
+    if (this.Settings.UseCustomPrompt) {
+      prompt = this.DefaultPrompt(inputMessagesArray);
+    } else if (!this.Settings.UseCustomPrompt) {
+      prompt = this.Settings.CustomPrompt;
+    }
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -96,8 +110,12 @@ module.exports = class ReplyGPT {
 
     const output = `
 You are a Discord Reply AI designed to automatically reply to messages 
-in the style of the user. You will be given the last 15 messages 
-between the local user (who you are replying as) and the remote 
+in the style of the user ${
+      this.UserStore.getCurrentUser().username
+    }. You will be given the last 15 messages 
+between the local user ${
+      this.UserStore.getCurrentUser().username
+    }, (who you are replying as) and the remote 
 user (who you are replying to). You will then be asked to reply 
 to the remote user in the style of the local user. Remember not 
 to say anything that would give away that you are an AI. 
@@ -111,7 +129,7 @@ the remote user:
 
 ${inputMessagesArray.join("\n")}
 
-YOUR RESPONSE AS THE LOCAL USER: _____
+YOUR RESPONSE AS ${this.UserStore.getCurrentUser().username}: _____
 
 DO NOT USE EMOJIS UNDER ANY CIRCUMSTANCES
 
@@ -229,41 +247,154 @@ json object.
       } // message extra
     );
   }
+
+  getSettingsPanel() {
+    const settingsPanel = document.createElement("div");
+    settingsPanel.id = "my-settings";
+    // 1. OpenAIKey Setting
+    const OpenAIKeySetting = document.createElement("div");
+    OpenAIKeySetting.classList.add("setting");
+  
+    const OpenAIKeyLabel = document.createElement("span");
+    OpenAIKeyLabel.textContent = "OpenAI Key";
+  
+    const OpenAIKeyInput = document.createElement("input");
+    OpenAIKeyInput.type = "text";
+    OpenAIKeyInput.name = "OpenAIKey";
+  
+    OpenAIKeyInput.addEventListener('input', (e) => {
+      this.Settings.OpenAIKey = e.target.value;
+      this.saveSettings();
+    });
+  
+    OpenAIKeySetting.append(OpenAIKeyLabel, OpenAIKeyInput);
+  
+    // 2. RandomDelayMin Setting
+    const randomDelayMinSetting = document.createElement("div");
+    randomDelayMinSetting.classList.add("setting");
+  
+    const randomDelayMinLabel = document.createElement("span");
+    randomDelayMinLabel.textContent = "Random Delay Min";
+  
+    const randomDelayMinInput = document.createElement("input");
+    randomDelayMinInput.type = "number";
+    randomDelayMinInput.name = "RandomDelayMin";
+  
+    randomDelayMinInput.addEventListener('input', (e) => {
+      this.Settings.RandomDelayMin = e.target.value;
+      this.saveSettings();
+    });
+  
+    randomDelayMinSetting.append(randomDelayMinLabel, randomDelayMinInput);
+  
+    // 3. RandomDelayMax Setting
+    const randomDelayMaxSetting = document.createElement("div");
+    randomDelayMaxSetting.classList.add("setting");
+  
+    const randomDelayMaxLabel = document.createElement("span");
+    randomDelayMaxLabel.textContent = "Random Delay Max";
+  
+    const randomDelayMaxInput = document.createElement("input");
+    randomDelayMaxInput.type = "number";
+    randomDelayMaxInput.name = "RandomDelayMax";
+  
+    randomDelayMaxInput.addEventListener('input', (e) => {
+      this.Settings.RandomDelayMax = e.target.value;
+      this.saveSettings();
+    });
+  
+    randomDelayMaxSetting.append(randomDelayMaxLabel, randomDelayMaxInput);
+  
+    // 4. RandomDelayEnabled Setting
+    const randomDelayEnabledSetting = document.createElement("div");
+    randomDelayEnabledSetting.classList.add("setting");
+  
+    const randomDelayEnabledLabel = document.createElement("span");
+    randomDelayEnabledLabel.textContent = "Random Delay Enabled";
+  
+    const randomDelayEnabledInput = document.createElement("input");
+    randomDelayEnabledInput.type = "checkbox";
+    randomDelayEnabledInput.name = "RandomDelayEnabled";
+  
+    randomDelayEnabledInput.addEventListener('input', (e) => {
+      this.Settings.RandomDelayEnabled = e.target.checked;
+      this.saveSettings();
+    });
+  
+    randomDelayEnabledSetting.append(randomDelayEnabledLabel, randomDelayEnabledInput);
+  
+    // 5. CustomPrompt Setting
+    const customPromptSetting = document.createElement("div");
+    customPromptSetting.classList.add("setting");
+  
+    const customPromptLabel = document.createElement("span");
+    customPromptLabel.textContent = "Custom Prompt";
+  
+    const customPromptInput = document.createElement("input");
+    customPromptInput.type = "text";
+    customPromptInput.name = "CustomPrompt";
+  
+    customPromptInput.addEventListener('input', (e) => {
+      this.Settings.CustomPrompt = e.target.value;
+      this.saveSettings();
+    });
+  
+    customPromptSetting.append(customPromptLabel, customPromptInput);
+  
+    // 6. UseCustomPrompt Setting
+    const useCustomPromptSetting = document.createElement("div");
+    useCustomPromptSetting.classList.add("setting");
+  
+    const useCustomPromptLabel = document.createElement("span");
+    useCustomPromptLabel.textContent = "Use Custom Prompt";
+  
+    const useCustomPromptInput = document.createElement("input");
+    useCustomPromptInput.type = "checkbox";
+    useCustomPromptInput.name = "UseCustomPrompt";
+  
+    useCustomPromptInput.addEventListener('input', (e) => {
+      this.Settings.UseCustomPrompt = e.target.checked;
+      this.saveSettings();
+    });
+  
+    useCustomPromptSetting.append(useCustomPromptLabel, useCustomPromptInput);
+  
+    // 7. MessagesToRead Setting
+    const messagesToReadSetting = document.createElement("div");
+    messagesToReadSetting.classList.add("setting");
+  
+    const messagesToReadLabel = document.createElement("span");
+    messagesToReadLabel.textContent = "Messages to Read";
+  
+    const messagesToReadInput = document.createElement("input");
+    messagesToReadInput.type = "number";
+    messagesToReadInput.name = "MessagesToRead";
+  
+    messagesToReadInput.addEventListener('input', (e) => {
+      this.Settings.MessagesToRead = e.target.value;
+      this.saveSettings();
+    });
+  
+    messagesToReadSetting.append(messagesToReadLabel, messagesToReadInput);
+  
+    // Append settings to the settings panel
+    settingsPanel.append(
+      OpenAIKeySetting,
+      randomDelayMinSetting,
+      randomDelayMaxSetting,
+      randomDelayEnabledSetting,
+      customPromptSetting,
+      useCustomPromptSetting,
+      messagesToReadSetting
+    );
+    return settingsPanel;
+  }
+  
+  loadSettings() {
+    this.Settings = BdApi.Data.load("Autopilot", "settings") || this.Settings;
+  }
+  
+  saveSettings() {
+    BdApi.Data.save("Autopilot", "settings", this.Settings);
+  }
 };
-
-// const { React } = BdApi;
-
-// const PanelButton = BdApi.Webpack.getModule(m => m.toString?.().includes(".Masks.PANEL_BUTTON"));
-
-// function AutoPilotButton() {
-//   const [ checked, setChecked ] = React.useState(false);
-
-//   return React.createElement(PanelButton, {
-//     ariaChecked: checked,
-//     ariaLabel: checked ? "Checked" : "Unchecked",
-//     disabled: false,
-//     icon: (props) => React.createElement("div", props, checked.toString()),
-//     iconForeground: "",
-//     innerClassName: "",
-//     onClick: () => setChecked(!checked),
-//     role: "switch",
-//     tooltipText: checked ? "Checked" : "Unchecked"
-//   });
-// };
-
-// function patchPanel() {
-//   const node = document.querySelector("title-31SJ6t > .toolbar-3_r2xA > .container-ZMc96U");
-//   if (!node) {
-//     console.log("no node");
-//     return;
-//   }
-//   console.log("node found, patching")
-//   const instance = BdApi.ReactUtils.getOwnerInstance(node);
-//   if (!instance) return;
-//   BdApi.Patcher.after("Plugin", instance, "render", (that, args, res) => {
-//     const flex = BdApi.Utils.findInTree(res, m => m?.children && m.shrink, { walkable: [ "children", "props" ] });
-//     flex.children.unshift(React.createElement(AutoPilotButton));
-//   });
-//   instance.forceUpdate();
-// };
-
