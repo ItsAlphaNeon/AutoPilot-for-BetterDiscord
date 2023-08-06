@@ -419,6 +419,7 @@ json object.
     const CustomPromptSetting = this.buildSetting("Custom Prompt", "CustomPrompt", "text", this.Settings.CustomPrompt);
     const UseCustomPromptSetting = this.buildSetting("Use Custom Prompt", "UseCustomPrompt", "checkbox", this.Settings.UseCustomPrompt);
     const MessagesToReadSetting = this.buildSetting("Messages to Read", "MessagesToRead", "number", this.Settings.MessagesToRead);
+    const ResetSettingsButton = this.buildSetting("Reset Settings", "ResetSettings", "button", "Reset Settings", () => {this.resetSettings();});
     
     // Append settings to the settings panel
     settingsPanel.append(
@@ -426,9 +427,11 @@ json object.
       RandomDelayMinSetting,
       RandomDelayMaxSetting,
       RandomDelayEnabledSetting,
-      CustomPromptSetting,
-      UseCustomPromptSetting,
-      MessagesToReadSetting
+      // CustomPromptSetting,
+      // UseCustomPromptSetting,
+      MessagesToReadSetting,
+      ResetSettingsButton
+      
     );
     
     return settingsPanel;
@@ -480,6 +483,24 @@ json object.
   saveSettings() {
     BdApi.Data.save("Autopilot", "settings", this.Settings);
   }
+
+  resetSettings() {
+    console.log("Resetting settings");
+    this.Settings = {
+      OpenAIKey: "OPENAI_KEY_HERE",
+      RandomDelayMin: 1,
+      RandomDelayMax: 10,
+      RandomDelayEnabled: true,
+      CustomPrompt: "PROMPT_HERE",
+      UseCustomPrompt: false,
+      MessagesToRead: 20,
+      EnabledChannels: [],
+      IsFirstRun: true,
+    };
+    this.saveSettings();
+    BdApi.alert("Autopilot", "Settings reset! Please reload Discord.");
+  }
+
 
   enableChannel(channelId) {
     this.Settings.EnabledChannels.push(channelId);
@@ -872,6 +893,31 @@ input[type=checkbox]:checked + .switch {
 
 input[type=checkbox] {
   display : none;
+}
+
+.setting input[type=button] {
+  padding: 10px 20px;
+  background-color: #3483eb;
+  border: none;
+  color: white; 
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  transition-duration: 0.4s; 
+  cursor: pointer; 
+  border-radius: 5px;
+}
+
+.setting input[type=button]:hover {
+  background-color: #1f4e8c;
+}
+
+.setting input[type=button]:active {
+  background-color: #00439c;
+  box-shadow: 0 5px #666;
+  transform: translateY(2px);
 }
 
 )`
