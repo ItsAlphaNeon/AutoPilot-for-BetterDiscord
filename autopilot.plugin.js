@@ -87,10 +87,12 @@ class APTools {
 }
 
 class Icons {
+  static svgWidth = 20; // Set the desired width of the SVG icon
+  static svgHeight = 20; // Set the desired height of the SVG icon
   static svgIcon = `
       <svg
-        height="${svgHeight}"
-        width="${svgWidth}"
+        height="${Icons.svgHeight}"
+        width="${Icons.svgWidth}"
         version="1.1"
         id="svg509"
         viewBox="0 0 742.43835 786.30542"
@@ -160,6 +162,7 @@ module.exports = class Autopilot {
       UseCustomPrompt: false,
       MessagesToRead: 20,
       EnabledChannels: [],
+      IsFirstRun: true,
     };
 
     this.MessageStore = ZeresPluginLibrary.WebpackModules.getByProps(
@@ -184,23 +187,34 @@ module.exports = class Autopilot {
   }
 
   start() {
-    // Check whether the settings have been saved before,
-    // if not, save the default settings
-
+    // Load settings if they don't exist
     if (!BdApi.Data.load("Autopilot", "settings")) {
       this.saveSettings();
     }
     this.loadSettings();
 
-    if (
-      this.Settings.OpenAIKey === "OPENAI_KEY_HERE" ||
-      this.Settings.OpenAIKey === ""
-    ) {
-      BdApi.alert(
+    // Check if first run
+    if (this.Settings.IsFirstRun) {
+      BdApi.UI.showConfirmationModal(
         "Autopilot",
-        "Please enter your OpenAI key in the settings panel."
+        "Welcome to Autopilot! To begin, please enter your OpenAI key in the settings panel. You can find your key at https://beta.openai.com/account/api-keys. After you have entered your key, enable any Direct Messages you wish for Autopilot to reply to, and press the Autopilot button in the typing bar to enable Autopilot for any enabled channels."
       );
+      this.Settings.IsFirstRun = false;
+      this.saveSettings();
+      return;
+    } else {
+      if (
+        this.Settings.OpenAIKey == "OPENAI_KEY_HERE" ||
+        this.Settings.OpenAIKey == ""
+      ) {
+        BdApi.alert(
+          "Autopilot",
+          "Please enter your OpenAI key in the settings panel."
+        );
+      }
     }
+
+    
 
     // Attach the button to the title bar
     this.startObserver();
@@ -393,184 +407,63 @@ json object.
   }
 
   getSettingsPanel() {
+    // Set up panel and load settings
     const settingsPanel = document.createElement("div");
-    settingsPanel.id = "my-settings";
-
-    // 1. OpenAIKey Setting
-    const OpenAIKeySetting = document.createElement("span");
-    OpenAIKeySetting.classList.add("setting");
-
-    const OpenAIKeyLabel = document.createElement("span");
-    OpenAIKeyLabel.textContent = "OpenAI Key";
-
-    const OpenAIKeyInput = document.createElement("input");
-    OpenAIKeyInput.type = "text";
-    OpenAIKeyInput.name = "OpenAIKey";
-
-    OpenAIKeyInput.addEventListener("input", (e) => {
-      this.Settings.OpenAIKey = e.target.value;
-      this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
-    });
-
-    OpenAIKeySetting.append(OpenAIKeyLabel, OpenAIKeyInput);
-
-    // 2. RandomDelayMin Setting
-    const randomDelayMinSetting = document.createElement("div");
-    randomDelayMinSetting.classList.add("setting");
-
-    const randomDelayMinLabel = document.createElement("span");
-    randomDelayMinLabel.textContent = "Random Delay Min";
-
-    const randomDelayMinInput = document.createElement("input");
-    randomDelayMinInput.type = "number";
-    randomDelayMinInput.name = "RandomDelayMin";
-
-    randomDelayMinInput.addEventListener("input", (e) => {
-      this.Settings.RandomDelayMin = e.target.value;
-      this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
-    });
-
-    randomDelayMinSetting.append(randomDelayMinLabel, randomDelayMinInput);
-
-    // 3. RandomDelayMax Setting
-    const randomDelayMaxSetting = document.createElement("div");
-    randomDelayMaxSetting.classList.add("setting");
-
-    const randomDelayMaxLabel = document.createElement("span");
-    randomDelayMaxLabel.textContent = "Random Delay Max";
-
-    const randomDelayMaxInput = document.createElement("input");
-    randomDelayMaxInput.type = "number";
-    randomDelayMaxInput.name = "RandomDelayMax";
-
-    randomDelayMaxInput.addEventListener("input", (e) => {
-      this.Settings.RandomDelayMax = e.target.value;
-      this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
-    });
-
-    randomDelayMaxSetting.append(randomDelayMaxLabel, randomDelayMaxInput);
-
-    // 4. RandomDelayEnabled Setting
-    const randomDelayEnabledSetting = document.createElement("div");
-    randomDelayEnabledSetting.classList.add("setting");
-
-    const randomDelayEnabledLabel = document.createElement("span");
-    randomDelayEnabledLabel.textContent = "Random Delay Enabled";
-
-    const randomDelayEnabledInput = document.createElement("input");
-    randomDelayEnabledInput.type = "checkbox";
-    randomDelayEnabledInput.name = "RandomDelayEnabled";
-
-    randomDelayEnabledInput.addEventListener("input", (e) => {
-      this.Settings.RandomDelayEnabled = e.target.checked;
-      this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
-    });
-
-    randomDelayEnabledSetting.append(
-      randomDelayEnabledLabel,
-      randomDelayEnabledInput
-    );
-
-    // 5. CustomPrompt Setting
-    const customPromptSetting = document.createElement("div");
-    customPromptSetting.classList.add("setting");
-
-    const customPromptLabel = document.createElement("span");
-    customPromptLabel.textContent = "Custom Prompt";
-
-    const customPromptInput = document.createElement("input");
-    customPromptInput.type = "text";
-    customPromptInput.name = "CustomPrompt";
-
-    customPromptInput.addEventListener("input", (e) => {
-      this.Settings.CustomPrompt = e.target.value;
-      this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
-    });
-
-    customPromptSetting.append(customPromptLabel, customPromptInput);
-
-    // 6. UseCustomPrompt Setting
-    const useCustomPromptSetting = document.createElement("div");
-    useCustomPromptSetting.classList.add("setting");
-
-    const useCustomPromptLabel = document.createElement("span");
-    useCustomPromptLabel.textContent = "Use Custom Prompt";
-
-    const useCustomPromptInput = document.createElement("input");
-    useCustomPromptInput.type = "checkbox";
-    useCustomPromptInput.name = "UseCustomPrompt";
-
-    useCustomPromptInput.addEventListener("input", (e) => {
-      this.Settings.UseCustomPrompt = e.target.checked;
-      this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
-    });
-
-    useCustomPromptSetting.append(useCustomPromptLabel, useCustomPromptInput);
-
-    // 7. MessagesToRead Setting
-    const messagesToReadSetting = document.createElement("div");
-    messagesToReadSetting.classList.add("setting");
-
-    const messagesToReadLabel = document.createElement("span");
-    messagesToReadLabel.textContent = "Messages to Read";
-
-    const messagesToReadInput = document.createElement("input");
-    messagesToReadInput.type = "number";
-    messagesToReadInput.name = "MessagesToRead";
-
-    messagesToReadInput.addEventListener("input", (e) => {
-      this.Settings.MessagesToRead = e.target.value;
-      this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
-    });
-
-    // Load settings
     this.loadSettings();
-
-    // Populate the inputs with the saved settings
-    OpenAIKeyInput.value = this.Settings.OpenAIKey;
-    randomDelayMinInput.value = this.Settings.RandomDelayMin;
-    randomDelayMaxInput.value = this.Settings.RandomDelayMax;
-    randomDelayEnabledInput.checked = this.Settings.RandomDelayEnabled;
-    customPromptInput.value = this.Settings.CustomPrompt;
-    useCustomPromptInput.checked = this.Settings.UseCustomPrompt;
-    messagesToReadInput.value = this.Settings.MessagesToRead;
-
-    messagesToReadSetting.append(messagesToReadLabel, messagesToReadInput);
-
+    
+    // Define settings
+    const OpenAIKeySetting = this.buildSetting("OpenAI Key", "OpenAIKey", "text", this.Settings.OpenAIKey);
+    const RandomDelayMinSetting = this.buildSetting("Random Delay Min", "RandomDelayMin", "number", this.Settings.RandomDelayMin);
+    const RandomDelayMaxSetting = this.buildSetting("Random Delay Max", "RandomDelayMax", "number", this.Settings.RandomDelayMax);
+    const RandomDelayEnabledSetting = this.buildSetting("Random Delay Enabled", "RandomDelayEnabled", "checkbox", this.Settings.RandomDelayEnabled);
+    const CustomPromptSetting = this.buildSetting("Custom Prompt", "CustomPrompt", "text", this.Settings.CustomPrompt);
+    const UseCustomPromptSetting = this.buildSetting("Use Custom Prompt", "UseCustomPrompt", "checkbox", this.Settings.UseCustomPrompt);
+    const MessagesToReadSetting = this.buildSetting("Messages to Read", "MessagesToRead", "number", this.Settings.MessagesToRead);
+    
     // Append settings to the settings panel
     settingsPanel.append(
       OpenAIKeySetting,
-      randomDelayMinSetting,
-      randomDelayMaxSetting,
-      randomDelayEnabledSetting,
-      customPromptSetting,
-      useCustomPromptSetting,
-      messagesToReadSetting
+      RandomDelayMinSetting,
+      RandomDelayMaxSetting,
+      RandomDelayEnabledSetting,
+      CustomPromptSetting,
+      UseCustomPromptSetting,
+      MessagesToReadSetting
     );
-
+    
     return settingsPanel;
   }
+  
+  buildSetting(text, key, type, value, callback = () => {}) {
+    const setting = Object.assign(document.createElement("div"), {className: "setting"});
+    const input = Object.assign(document.createElement("input"), {type: type, name: key, value: value, id: key});
+    const label = Object.assign(document.createElement("span"), {textContent: text});
+    
+    let switchElement;
+    if (type === 'checkbox') {
+        if (value) input.checked = true;
+        switchElement = Object.assign(document.createElement("label"), {className: "switch", htmlFor: key});
+        setting.append(label, input, switchElement); // Append label, input, and switch
+    } else {
+        setting.append(label, input); // Append label and input
+    }
+    
+    input.addEventListener("input", () => {
+        const newValue = type == "checkbox" ? input.checked : input.value;
+        this.Settings[key] = newValue;
+        this.saveSettings();
+
+        // Send a toast notification
+        BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
+
+        callback(newValue);
+    });
+
+    return setting;
+}
+
+
+  
 
   loadSettings() {
     const savedSettings = BdApi.Data.load("Autopilot", "settings");
@@ -677,10 +570,6 @@ json object.
   }
 
   attatchAutopilotButton() {
-    // Icon in SVG format
-    let svgWidth = 20; // Set the desired width of the SVG icon
-    let svgHeight = 20; // Set the desired height of the SVG icon
-
     let typingIconsBar = document.querySelector(
       ".inner-NQg18Y > .buttons-uaqb-5"
     );
@@ -692,35 +581,41 @@ json object.
 
       let autopilotButton = document.createElement("button");
       autopilotButton.id = "autopilot_button";
+      autopilotButton.style.position = "relative";
+      autopilotButton.classList.add("AutopilotButtonIconInactive");
+
+      // Create a pulse blob
+      let pulseBlob = document.createElement("div");
+      // check if autopilot is enabled on creation
+      if (this.autopilotActive == true) {
+        autopilotButton.classList.remove("AutopilotButtonIconInactive");
+        autopilotButton.classList.add("AutopilotButtonIconActive");
+        pulseBlob.classList.add("blob"); // pulsing effect
+      } else {
+        autopilotButton.classList.add("AutopilotButtonIconInactive");
+        autopilotButton.classList.remove("AutoilotButtonIconActive");
+        pulseBlob.classList.remove("blob"); // pulsing effect
+      }
+
       autopilotButton.addEventListener("click", () => {
         this.toggleAutopilot();
         if (this.autopilotActive == true) {
-          autopilotButton.classList.add("AutopilotActiveAnimation");
+          autopilotButton.classList.remove("AutopilotButtonIconInactive");
+          autopilotButton.classList.add("AutopilotButtonIconActive");
+          pulseBlob.classList.add("blob"); // pulsing effect
         } else {
-          autopilotButton.classList.remove("AutopilotActiveAnimation");
+          autopilotButton.classList.add("AutopilotButtonIconInactive");
+          autopilotButton.classList.remove("AutopilotButtonIconActive");
+          pulseBlob.classList.remove("blob"); // pulsing effect
         }
       });
 
       autopilotButton.innerHTML = Icons.svgIcon; // SVG content hardcoded
-      autopilotButton.classList.add("AutopilotButtonIcon");
-
-      // indicator pulse object animation
-      const radarPulseDiv = document.createElement("div");
-      radarPulseDiv.classList.add("RadarPulse");
-      radarPulseDiv.style.width = autopilotButton.offsetWidth + "px";
-      radarPulseDiv.style.height = autopilotButton.offsetHeight + "px";
-
-      // position it over the button
-      const buttonPosition = autopilotButton.getBoundingClientRect();
-      radarPulseDiv.style.top = buttonPosition.top + "px";
-      radarPulseDiv.style.left = buttonPosition.left + "px";
-
-      // append to the button
-      typingIconsBar.appendChild(radarPulseDiv);
-
-      document.body.appendChild(radarPulseDiv);
 
       typingIconsBar.insertBefore(autopilotButton, typingIconsBar.firstChild);
+
+      // Add the pulse blob to the button
+      autopilotButton.appendChild(pulseBlob);
     }
   }
 
@@ -747,6 +642,16 @@ json object.
   }
 
   toggleAutopilot() {
+    // Check if there is a key in settings
+    if (
+      this.Settings.OpenAIKey == "OPENAI_KEY_HERE" ||
+      this.Settings.OpenAIKey == ""
+    ) {
+      BdApi.UI.showNotice(
+        "Autopilot can't be enabled until you enter your OpenAI key in the settings panel."
+      );
+      return;
+    }
     if (this.autopilotActive == true) {
       this.autopilotActive = false;
       // this.stopAutopilot();
@@ -802,52 +707,172 @@ BdApi.DOM.addStyle(
 );
 
 BdApi.DOM.addStyle(
-  "AutoPilotIcon",
+  "AutopilotButtonIconInactive",
   `
-  .AutopilotButtonIcon {
+  .AutopilotButtonIconInactive {
     padding: 8px;
     border-radius: 5px;
     color: white;
   }
 
-  .AutopilotButtonIcon svg path {
+  .AutopilotButtonIconInactive svg path {
     fill: #B5BAC1;
   }
 
-  .AutopilotButtonIcon:hover svg path {
+  .AutopilotButtonIconInactive:hover svg path {
     fill: #D8D8D8;
   }
 
-  .AutopilotButtonIcon:hover svg path {
+  .AutopilotButtonIconInactive:hover svg path {
     fill: #D8D8D8;
   }
 
-  .AutopilotButtonIcon {
+  .AutopilotButtonIconInactive {
     background-color: transparent;
   }
   `
 );
-
+// rotate the button
 BdApi.DOM.addStyle(
-  "RadarPulseAnimation",
+  "AutopilotButtonIconActive",
   `
-  .RadarPulse {
-    position: absolute;
-    border-radius: 50%;
-    background-color: rgba(0, 100, 200, 0.5);
-    animation: radarPulse 1s ease-in infinite; 
-    pointer-events: none; 
+  .AutopilotButtonIconActive {
+    padding: 8px;
+    border-radius: 5px;
+    color: white;
+    background-color: transparent;
+    animation: rotate 5s ease-in-out infinite;
   }
 
-  @keyframes radarPulse {
+  .AutopilotButtonIconActive svg path {
+    fill: lightgreen;
+  }
+
+  .AutopilotButtonIconActive:hover svg path {
+    fill: #D8D8D8;
+  }
+
+  @keyframes rotate {
     0% {
-      transform: scale(0.1);
-      opacity: 1;
+      transform: rotate(-45deg);
+    }
+    50% {
+      transform: rotate(45deg);
     }
     100% {
-      transform: scale(1);
-      opacity: 0;
+      transform: rotate(-45deg);
     }
   }
   `
+);
+// pulse blob
+BdApi.DOM.addStyle(
+  "BlobAnimation",
+  `
+  .blob {
+    position: absolute;
+    top: 5px;
+    left: 2px;
+    border-radius: 50%;
+    height: 30px;
+    width: 30px;
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 1);
+    transform: scale(1);
+    animation: pulse 2s infinite;
+  }
+    
+  @keyframes pulse {
+    0% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(128, 128, 128, 0.7);
+    }
+
+    70% {
+      transform: scale(1);
+      box-shadow: 0 0 0 10px rgba(128, 128, 128, 0);
+    }
+
+    100% {
+      transform: scale(0.95);
+      box-shadow: 0 0 0 0 rgba(128, 128, 128, 0);
+    }
+  }
+  }
+  
+  `
+);
+
+BdApi.DOM.addStyle(
+  "SettingsStyling",
+  `
+  #my-settings {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+}
+
+.setting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px; 
+    background-color: #f9f9f9;
+}
+
+.setting span {
+    font-weight: bold;
+}
+
+.setting input[type=text],
+.setting input[type=number]{
+    width: 50%;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.setting input[type=checkbox] {
+    width: auto;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+  background-color: rgba(0, 0, 0, 0.25);
+  border-radius: 20px;
+  transition: all 0.3s;
+  cursor: pointer;
+}
+
+.switch::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  border-radius:50%;
+  background-color: white;
+  top: 1px;
+  left: 1px;
+  transition: all 0.3s;
+}
+
+input[type=checkbox]:checked + .switch::after {
+  left : 20px;
+}
+
+input[type=checkbox]:checked + .switch {
+  background-color: #7983ff;
+}
+
+input[type=checkbox] {
+  display : none;
+}
+
+)`
 );
