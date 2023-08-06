@@ -89,6 +89,7 @@ class APTools {
 module.exports = class Autopilot {
   constructor() {
     // Default settings
+    this.autopilotActive = false;
     this.Settings = {
       OpenAIKey: "OPENAI_KEY_HERE",
       RandomDelayMin: 1,
@@ -124,6 +125,7 @@ module.exports = class Autopilot {
   start() {
     // Check whether the settings have been saved before,
     // if not, save the default settings
+
     if (!BdApi.Data.load("Autopilot", "settings")) {
       this.saveSettings();
     }
@@ -680,7 +682,7 @@ json object.
     let typingIconsBar = document.querySelector(
       ".inner-NQg18Y > .buttons-uaqb-5"
     );
-
+    
     if (typingIconsBar) {
       if (typingIconsBar.querySelector("#autopilot_button")) {
         return; // Exit if button already exists
@@ -689,7 +691,7 @@ json object.
       let autopilotButton = document.createElement("button");
       autopilotButton.id = "autopilot_button";
       autopilotButton.addEventListener("click", () => {
-        BdApi.UI.showToast("Button clicked!", (options = { type: "success" }));
+      this.toggleAutopilot();
       });
 
       autopilotButton.innerHTML = svgMarkup; // SVG content hardcoded
@@ -719,6 +721,20 @@ json object.
 
     // Start observing the document with the configured parameters
     this.observer.observe(document, observerOptions);
+  }
+
+  toggleAutopilot() {
+    if (this.autopilotActive == true) {
+      this.autopilotActive = false;
+      // this.stopAutopilot();
+      BdApi.UI.showToast("Autopilot disabled!");
+    }
+    else {
+      this.autopilotActive = true;
+      // this.startAutopilot();
+      BdApi.UI.showToast("Autopilot enabled!");
+    }
+
   }
 };
 
@@ -774,7 +790,15 @@ BdApi.DOM.addStyle(
   }
 
   .AutopilotButtonIcon svg path {
-    fill: "#B5BAC1";
+    fill: #B5BAC1;
+  }
+
+  .AutopilotButtonIcon:hover svg path {
+    fill: #D8D8D8;
+  }
+
+  .AutopilotButtonIcon:hover svg path {
+    fill: #D8D8D8;
   }
 
   .AutopilotButtonIcon {
@@ -782,3 +806,13 @@ BdApi.DOM.addStyle(
   }
   `
 );
+
+BdApi.DOM.addStyle(
+  "AutoPilotIconAnimation",
+  `
+  .AutopilotActiveAnimation {
+    animation: rotate 2s linear infinite;
+  }
+  `
+);
+
