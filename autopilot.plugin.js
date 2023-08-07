@@ -303,14 +303,15 @@ YOUR RESPONSE AS ${this.UserStore.getCurrentUser().username}: _____
 
 
 
+ONLY respond in this format. Do not reply with anything but the 
+json object.
 
-Ensure you parse your response as a json object with the following 
+write your response as a json object with the following 
 format: {
     "message": "YOUR RESPONSE HERE"
 }
 
-ONLY respond in this format. Do not reply with anything but the 
-json object.
+
         `;
     console.log(output);
     return output;
