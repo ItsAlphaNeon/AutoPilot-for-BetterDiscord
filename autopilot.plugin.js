@@ -63,7 +63,6 @@ class APTools {
       i++
     ) {
       let message = messageArray[i];
-      console.log(message);
       let messageAuthor = message.author.globalName;
 
       if (messageAuthor !== userStore.getCurrentUser().globalName) {
@@ -76,10 +75,18 @@ class APTools {
     return ZeresPluginLibrary.DiscordModules.SelectedChannelStore.getChannelId();
   }
   static isDMChannel(channelId) {
-    if (
-      ZeresPluginLibrary.DiscordModules.ChannelStore.getChannel(channelId) == 1
-    ) {
-      return true;
+    let channel =
+      ZeresPluginLibrary.DiscordModules.ChannelStore.getChannel(channelId);
+
+    if (channel && channel.guild_id == null) {
+      // not a discord server, could be a group dm though, check the length of the recipients array
+      if (channel.recipients.length > 1) {
+        // group dm
+        return false;
+      } else if (channel.recipients.length == 1) {
+        // dm
+        return true;
+      }
     } else {
       return false;
     }
@@ -163,6 +170,7 @@ module.exports = class Autopilot {
       MessagesToRead: 20,
       EnabledChannels: [],
       IsFirstRun: true,
+      BlacklistedChannels: [],
     };
 
     this.MessageStore = ZeresPluginLibrary.WebpackModules.getByProps(
@@ -214,14 +222,12 @@ module.exports = class Autopilot {
       }
     }
 
-    
-
     // Attach the button to the title bar
     this.startObserver();
 
     // DEBUG - log every 1 second
     // setInterval(() => {
-    //   console.log(APTools.isDMChannel(APTools.getCurrentChannelId()));
+    //   console.log(APTools.isDMChannel(APTools.getCurrentChannelId())); // debug
     // }, 1000);
   }
 
@@ -410,17 +416,60 @@ json object.
     // Set up panel and load settings
     const settingsPanel = document.createElement("div");
     this.loadSettings();
-    
+
     // Define settings
-    const OpenAIKeySetting = this.buildSetting("OpenAI Key", "OpenAIKey", "text", this.Settings.OpenAIKey);
-    const RandomDelayMinSetting = this.buildSetting("Random Delay Min", "RandomDelayMin", "number", this.Settings.RandomDelayMin);
-    const RandomDelayMaxSetting = this.buildSetting("Random Delay Max", "RandomDelayMax", "number", this.Settings.RandomDelayMax);
-    const RandomDelayEnabledSetting = this.buildSetting("Random Delay Enabled", "RandomDelayEnabled", "checkbox", this.Settings.RandomDelayEnabled);
-    const CustomPromptSetting = this.buildSetting("Custom Prompt", "CustomPrompt", "text", this.Settings.CustomPrompt);
-    const UseCustomPromptSetting = this.buildSetting("Use Custom Prompt", "UseCustomPrompt", "checkbox", this.Settings.UseCustomPrompt);
-    const MessagesToReadSetting = this.buildSetting("Messages to Read", "MessagesToRead", "number", this.Settings.MessagesToRead);
-    const ResetSettingsButton = this.buildSetting("Reset Settings", "ResetSettings", "button", "Reset Settings", () => {this.resetSettings();});
-    
+    const OpenAIKeySetting = this.buildSetting(
+      "OpenAI Key",
+      "OpenAIKey",
+      "text",
+      this.Settings.OpenAIKey
+    );
+    const RandomDelayMinSetting = this.buildSetting(
+      "Minimum random delay (Seconds)",
+      "RandomDelayMin",
+      "number",
+      this.Settings.RandomDelayMin
+    );
+    const RandomDelayMaxSetting = this.buildSetting(
+      "Maximum random delay (Seconds)",
+      "RandomDelayMax",
+      "number",
+      this.Settings.RandomDelayMax
+    );
+    const RandomDelayEnabledSetting = this.buildSetting(
+      "Enable Random Delay",
+      "RandomDelayEnabled",
+      "checkbox",
+      this.Settings.RandomDelayEnabled
+    );
+    const CustomPromptSetting = this.buildSetting(
+      "Custom Prompt",
+      "CustomPrompt",
+      "text",
+      this.Settings.CustomPrompt
+    );
+    const UseCustomPromptSetting = this.buildSetting(
+      "Use Custom Prompt?",
+      "UseCustomPrompt",
+      "checkbox",
+      this.Settings.UseCustomPrompt
+    );
+    const MessagesToReadSetting = this.buildSetting(
+      "Number of messages read (Max 50)",
+      "MessagesToRead",
+      "number",
+      this.Settings.MessagesToRead
+    );
+    const ResetSettingsButton = this.buildSetting(
+      "Reset Settings",
+      "ResetSettings",
+      "button",
+      "Reset Settings",
+      () => {
+        console.log("clicked");
+      }
+    );
+
     // Append settings to the settings panel
     settingsPanel.append(
       OpenAIKeySetting,
@@ -431,42 +480,50 @@ json object.
       // UseCustomPromptSetting,
       MessagesToReadSetting,
       ResetSettingsButton
-      
     );
-    
+
     return settingsPanel;
   }
-  
+
   buildSetting(text, key, type, value, callback = () => {}) {
-    const setting = Object.assign(document.createElement("div"), {className: "setting"});
-    const input = Object.assign(document.createElement("input"), {type: type, name: key, value: value, id: key});
-    const label = Object.assign(document.createElement("span"), {textContent: text});
-    
+    const setting = Object.assign(document.createElement("div"), {
+      className: "setting",
+    });
+    const input = Object.assign(document.createElement("input"), {
+      type: type,
+      name: key,
+      value: value,
+      id: key,
+    });
+    const label = Object.assign(document.createElement("span"), {
+      textContent: text,
+    });
+
     let switchElement;
-    if (type === 'checkbox') {
-        if (value) input.checked = true;
-        switchElement = Object.assign(document.createElement("label"), {className: "switch", htmlFor: key});
-        setting.append(label, input, switchElement); // Append label, input, and switch
+    if (type === "checkbox") {
+      if (value) input.checked = true;
+      switchElement = Object.assign(document.createElement("label"), {
+        className: "switch",
+        htmlFor: key,
+      });
+      setting.append(label, input, switchElement); // Append label, input, and switch
     } else {
-        setting.append(label, input); // Append label and input
+      setting.append(label, input); // Append label and input
     }
-    
+
     input.addEventListener("input", () => {
-        const newValue = type == "checkbox" ? input.checked : input.value;
-        this.Settings[key] = newValue;
-        this.saveSettings();
+      const newValue = type == "checkbox" ? input.checked : input.value;
+      this.Settings[key] = newValue;
+      this.saveSettings();
 
-        // Send a toast notification
-        BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
+      // Send a toast notification
+      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
 
-        callback(newValue);
+      callback(newValue);
     });
 
     return setting;
-}
-
-
-  
+  }
 
   loadSettings() {
     const savedSettings = BdApi.Data.load("Autopilot", "settings");
@@ -501,7 +558,6 @@ json object.
     BdApi.alert("Autopilot", "Settings reset! Please reload Discord.");
   }
 
-
   enableChannel(channelId) {
     this.Settings.EnabledChannels.push(channelId);
     this.saveSettings();
@@ -530,10 +586,10 @@ json object.
         return;
       }
 
-      // if (APTools.isDMChannel(APTools.getCurrentChannelId()) == false) {
-      //   // Not a DM channel, exit
-      //   return;
-      // }
+      if (APTools.isDMChannel(APTools.getCurrentChannelId()) == false) {
+        // Not a DM channel, exit
+        return;
+      }
 
       let autopilotChannelButton = document.createElement("button");
       autopilotChannelButton.id = "autopilot_button";
@@ -588,6 +644,38 @@ json object.
 
       titleBar.insertBefore(autopilotChannelButton, titleBar.firstChild);
     }
+  }
+  attatchClearButton() {
+    let titleBar = document.querySelector(".title-31SJ6t > .toolbar-3_r2xA");
+
+    if (!titleBar || !titleBar.querySelector("#autopilot_button")) {
+      return;
+    }
+
+    if (titleBar.querySelector("#clear_button")) {
+      return;
+    }
+
+    let clearButton = document.createElement("button");
+    clearButton.id = "clear_button";
+    clearButton.classList.add("ClearButton");
+
+    clearButton.textContent = "Disable All";
+
+    clearButton.addEventListener("click", () => {
+      this.Settings.EnabledChannels = [];
+      this.saveSettings();
+      // Query the autopilot button from the DOM
+      let autopilotButton = titleBar.querySelector("#autopilot_button");
+      // If it exists, remove the currently set class and add a new one
+      if (autopilotButton) {
+        autopilotButton.classList.remove("AutopilotButtonActive");
+        autopilotButton.classList.add("AutopilotButtonInactive");
+      }
+      BdApi.UI.showToast("Autopilot disabled for all channels!");
+    });
+
+    titleBar.insertBefore(clearButton, titleBar.firstChild);
   }
 
   attatchAutopilotButton() {
@@ -648,6 +736,7 @@ json object.
         if (mutation.type === "childList" && mutation.addedNodes.length > 0) {
           this.attachUserManagerButton();
           this.attatchAutopilotButton();
+          this.attatchClearButton();
         }
       });
     });
@@ -675,12 +764,66 @@ json object.
     }
     if (this.autopilotActive == true) {
       this.autopilotActive = false;
-      // this.stopAutopilot();
+      this.stopAutopilot();
       BdApi.UI.showToast("Autopilot disabled!");
+
+      startAutopilot();
     } else {
       this.autopilotActive = true;
-      // this.startAutopilot();
+      this.startAutopilot();
       BdApi.UI.showToast("Autopilot enabled!");
+    }
+  }
+
+  async startAutopilot() {
+    console.log("Autopilot started!");
+    while (this.autopilotActive) {
+      // get the current length of the channels array
+      let channelsArrayLength = this.Settings.EnabledChannels.length;
+      for (let i = 0; i < channelsArrayLength; i++) {
+        // get the channel id from the array
+        let channelId = this.Settings.EnabledChannels[i];
+        // check if the channel is a DM
+        if (APTools.isDMChannel(channelId)) {
+          // channel is a DM, check if it's blacklisted
+          if (this.Settings.BlacklistedChannels.includes(channelId)) {
+            // channel is blacklisted, skip
+            console.log(
+              "Channel ID " + channelId + " is blacklisted. Skipping."
+            );
+            continue;
+          } else {
+            // channel is not blacklisted, use it with the AI
+            // await this.checkDirectMessages(channelId);
+            BdApi.UI.showToast(
+              "Autopilot would have sent a message to " +
+                APTools.getDisplayNameFromChannel(channelId)
+            ); // debug
+          }
+        }
+      }
+
+      // Add a delay here to avoid high CPU usage
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Adjust the delay as needed
+    }
+    console.log("Autopilot stopped!");
+  }
+
+  stopAutopilot() {
+    let typingIconsBar = document.querySelector(
+      ".inner-NQg18Y > .buttons-uaqb-5"
+    );
+    // Query the autopilot button from the DOM
+    let autopilotButton = typingIconsBar.querySelector("#autopilot_button");
+    let pulseBlob = autopilotButton.querySelector(".blob");
+    // If it exists, remove the currently set class and add a new one
+    if (autopilotButton) {
+      // wait a second before removing the class to allow the animation to finish
+      setTimeout(() => {
+        pulseBlob.classList.remove("blob"); // pulsing effect
+      }, 1000);
+      autopilotButton.classList.add("AutopilotButtonIconInactive");
+        autopilotButton.classList.remove("AutopilotButtonIconActive");
     }
   }
 };
@@ -715,7 +858,7 @@ BdApi.DOM.addStyle(
 
   .AutopilotButtonActive:hover {
     filter: brightness(75%); 
-    transition: all 02s ease-in-out;
+    transition: all 0.2s ease-in-out;
   }
 
   @keyframes colorChange {
@@ -758,6 +901,7 @@ BdApi.DOM.addStyle(
   "AutopilotButtonIconActive",
   `
   .AutopilotButtonIconActive {
+    transition: all 0.1s ease-in-out;
     padding: 8px;
     border-radius: 5px;
     color: white;
@@ -921,4 +1065,20 @@ input[type=checkbox] {
 }
 
 )`
+);
+
+BdApi.DOM.addStyle(
+  "ClearButton",
+  `.ClearButton {
+  padding: 8px;
+  border-radius: 5px;
+  background-color: #1a1a1a;
+  color: #ffffff;
+  margin:5px;
+}
+
+.ClearButton:hover {
+  background-color: #0a0a0a;
+  transition: 0.2s;
+}`
 );
