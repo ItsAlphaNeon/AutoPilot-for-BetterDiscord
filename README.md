@@ -1,4 +1,4 @@
-# AutoPilot - A BetterDiscord Plugin
+# AutoPilot - Your AI AutoPilot for Discord
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
@@ -6,12 +6,12 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 
 ## Features
 
-- Generate and send ChatGPT / GPT3.5 replies to Discord DMs
-- Autopilot reply mode: Plugin automatically replies to DMs without user intervention
+- When enabled, autopilot will automatically reply to enabled channels with GPT responses based on your conversation
 
 ## Requirements
 
 - BetterDiscord: To use this plugin, you need to have BetterDiscord installed. If you don't have it, you can install it from the official [BetterDiscord website](https://betterdiscord.app/).
+- OpenAPI Key
 
 ## Installation
 
@@ -27,10 +27,10 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 
 ## Usage
 
-1. Once the plugin is enabled, you will see a new option in your Discord DM interface called "AutoPilot".
+1. Once the plugin is enabled, you will see a few new buttons in your DMs. Enable any channels you want to have AutoPilot reply to.
 2. In order to use it, you must provide your OpenAI API key in the plugin settings. You can get your key [Here](https://platform.openai.com/account/api-keys)
    - __Note: your OpenAI key isn't uploaded anywhere, and is kept on your local machine. Please be sure not to share this anywhere__
-4. Once you input your key, you can now toggle on or off AutoPilot replies per DM.
+4. Once you input your key, you can now toggle on or off AutoPilot next to the gift icon.
 5. Please note it is best to mess with settings to determine how accurate the AI will be replying for you.
 
 
