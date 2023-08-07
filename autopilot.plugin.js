@@ -2,7 +2,7 @@
  * @name Autopilot
  * @author AlphaNeon
  * @description A plugin that uses the OpenAI API to automatically reply to DM's you select. Very experimental, and just for fun.
- * @version 0.0.1
+ * @version 0.0.2
  */
 
 class APTools {
@@ -286,10 +286,12 @@ to the remote user in the style of the local user. Remember not
 to say anything that would give away that you are an AI. 
 You are doing your best to be the user you are replying as.
 Do not reply in more than 1 sentence. Keep your answers short and generic.
-make sure to use incorrect punctuation and grammar.
-do not capitalize your words or sentnaces. only reply with one phrase.
+make sure to use lazy punctuation and grammar.
+do not capitalize your words or sentances. only reply with one phrase.
 
 ex. "whats up" is a good response. "Whats up?" is not.
+
+
 
 DO NOT USE EMOJIS UNDER ANY CIRCUMSTANCES
 
@@ -297,10 +299,10 @@ The following is the last few messages between the local user and
 the remote user:
 
 ${inputMessagesArray.join("\n")}
-
 YOUR RESPONSE AS ${this.UserStore.getCurrentUser().username}: _____
 
-DO NOT USE EMOJIS UNDER ANY CIRCUMSTANCES
+
+
 
 Ensure you parse your response as a json object with the following 
 format: {
@@ -348,12 +350,18 @@ json object.
   async getGeneratedResponse() {
     try {
       const response = await this.getReplyFromAI(this.MessagesArray);
-      const responseObject = JSON.parse(response);
+      let responseObject;
+      try {
+        responseObject = JSON.parse(response);
+      } catch (error) {
+        console.error("Error parsing response:", error);
+        return null;
+      }
       // Do something with the response object
 
       return responseObject;
     } catch (error) {
-      console.error("Error parsing response:", error);
+      console.error("Error getting response from AI:", error);
       // Retry? debug
       throw error;
     }
@@ -362,6 +370,10 @@ json object.
   async checkDirectMessages(channelId) {
     this.MessagesArray = this.getMessagesArray(15, channelId); // Fetch new messages
 
+    if (this.MessagesArray.length == 0 || this.MessagesArray == undefined) {
+      // No messages found, exit
+      return;
+    }
     let isLastMessageLocalUser = false;
 
     let lastMessageUsername = this.MessagesArray[this.MessagesArray.length - 1]
@@ -380,6 +392,9 @@ json object.
     if (!isLastMessageLocalUser) {
       try {
         const response = await this.getGeneratedResponse();
+        if (response == null) {
+          return;
+        }
         // Send the generated response
         this.sendMessage(response.message, channelId);
         // Send a toast notification
@@ -520,9 +535,6 @@ json object.
       const newValue = type == "checkbox" ? input.checked : input.value;
       this.Settings[key] = newValue;
       this.saveSettings();
-
-      // Send a toast notification
-      BdApi.UI.showToast("Settings saved!", (options = { type: "success" }));
 
       callback(newValue);
     });
@@ -1051,10 +1063,6 @@ input[type=checkbox]:checked + .switch::after {
 
 input[type=checkbox]:checked + .switch {
   background-color: #7983ff;
-}
-
-input[type=checkbox] {
-  display : none;
 }
 
 .setting input[type=button] {
