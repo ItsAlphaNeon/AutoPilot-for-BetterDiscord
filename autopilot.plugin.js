@@ -261,6 +261,7 @@ module.exports = class Autopilot {
     });
 
     if (!response.ok) {
+      BdApi.showConfirmationModal("OpenAI Error", "Error: " + response.status);
       throw new Error(`HTTP error! status: ${response.status}`);
     } else {
       const jsonResp = await response.json();
@@ -276,7 +277,7 @@ module.exports = class Autopilot {
 You are a Discord Reply AI designed to automatically reply to messages 
 in the style of the user ${
       this.UserStore.getCurrentUser().username
-    }. You will be given the last 15 messages 
+    }. You will be given the last few messages 
 between the local user ${
       this.UserStore.getCurrentUser().username
     }, (who you are replying as) and the remote 
@@ -285,6 +286,10 @@ to the remote user in the style of the local user. Remember not
 to say anything that would give away that you are an AI. 
 You are doing your best to be the user you are replying as.
 Do not reply in more than 1 sentence. Keep your answers short and generic.
+make sure to use incorrect punctuation and grammar.
+do not capitalize your words or sentnaces. only reply with one phrase.
+
+ex. "whats up" is a good response. "Whats up?" is not.
 
 DO NOT USE EMOJIS UNDER ANY CIRCUMSTANCES
 
@@ -304,7 +309,6 @@ format: {
 
 ONLY respond in this format. Do not reply with anything but the 
 json object.
-
         `;
     console.log(output);
     return output;
@@ -377,18 +381,19 @@ json object.
       try {
         const response = await this.getGeneratedResponse();
         // Send the generated response
-        this.sendMessage(
-          response.message,
-          ZeresPluginLibrary.DiscordModules.SelectedChannelStore.getChannelId(
-            ZeresPluginLibrary.DiscordModules.SelectedChannelStore.getChannelId()
-          )
-        );
+        this.sendMessage(response.message, channelId);
         // Send a toast notification
         BdApi.UI.showToast(
-          repsonse.message + " sent to user " + getUsernameFromChannel()
+          response.message +
+            " sent to user " +
+            APTools.getUsernameFromChannel(channelId)
         );
       } catch (error) {
         console.error(error);
+        BdApi.UI.showConfirmationModal(
+          "Error",
+          "Error sending message: " + error
+        );
       }
     }
   }
@@ -766,8 +771,6 @@ json object.
       this.autopilotActive = false;
       this.stopAutopilot();
       BdApi.UI.showToast("Autopilot disabled!");
-
-      startAutopilot();
     } else {
       this.autopilotActive = true;
       this.startAutopilot();
@@ -778,6 +781,13 @@ json object.
   async startAutopilot() {
     console.log("Autopilot started!");
     while (this.autopilotActive) {
+      if (this.Settings.EnabledChannels.length == 0) {
+        console.log("No channels enabled, stopping autopilot.");
+        BdApi.showToast("No channels enabled, stopping autopilot.");
+        this.autopilotActive = false;
+        this.stopAutopilot();
+        return;
+      }
       // get the current length of the channels array
       let channelsArrayLength = this.Settings.EnabledChannels.length;
       for (let i = 0; i < channelsArrayLength; i++) {
@@ -794,17 +804,19 @@ json object.
             continue;
           } else {
             // channel is not blacklisted, use it with the AI
-            // await this.checkDirectMessages(channelId);
-            BdApi.UI.showToast(
-              "Autopilot would have sent a message to " +
-                APTools.getDisplayNameFromChannel(channelId)
-            ); // debug
+            await this.checkDirectMessages(channelId);
+            // BdApi.UI.showToast(
+            //   "Autopilot would have sent a message to " +
+            //     APTools.getDisplayNameFromChannel(channelId)
+            // ); // debug
           }
         }
       }
 
       // Add a delay here to avoid high CPU usage
-      await new Promise((resolve) => setTimeout(resolve, 1000)); // Adjust the delay as needed
+      await new Promise((resolve) =>
+        setTimeout(resolve, this.getRandomDelay())
+      ); // Adjust the delay as needed
     }
     console.log("Autopilot stopped!");
   }
@@ -821,10 +833,16 @@ json object.
       // wait a second before removing the class to allow the animation to finish
       setTimeout(() => {
         pulseBlob.classList.remove("blob"); // pulsing effect
-      }, 1000);
+      }, this.getRandomDelay());
       autopilotButton.classList.add("AutopilotButtonIconInactive");
-        autopilotButton.classList.remove("AutopilotButtonIconActive");
+      autopilotButton.classList.remove("AutopilotButtonIconActive");
     }
+  }
+  getRandomDelay() {
+    let min = this.Settings.RandomDelayMin;
+    let max = this.Settings.RandomDelayMax;
+    let randomDelay = Math.floor(Math.random() * (max - min + 1) + min);
+    return randomDelay * 1000; // convert to milliseconds
   }
 };
 
