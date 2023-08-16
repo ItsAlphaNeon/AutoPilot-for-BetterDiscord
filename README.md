@@ -31,6 +31,7 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 <!-- embed images -->
 ![image](images/enable.png)
 ![image](images/enabled.png)
+
 2. In order to use it, you must provide your OpenAI API key in the plugin settings. You can get your key [Here](https://platform.openai.com/account/api-keys)
 ![image](images/Settings.png)
    - __Note: your OpenAI key isn't uploaded anywhere, and is kept on your local machine. Please be sure not to share this anywhere__
