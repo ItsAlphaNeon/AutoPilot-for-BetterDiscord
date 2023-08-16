@@ -12,6 +12,7 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 
 - BetterDiscord: To use this plugin, you need to have BetterDiscord installed. If you don't have it, you can install it from the official [BetterDiscord website](https://betterdiscord.app/).
 - OpenAPI Key
+- ZeresPluginLibrary - You can get the library plugin from [Here]([https://betterdiscord.app/plugin/ZeresPluginLibrary)
 
 ## Installation
 
