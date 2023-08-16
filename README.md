@@ -17,8 +17,7 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 ## Installation
 
 1. First, make sure you have BetterDiscord installed.
-2. Go to the [Releases](https://github.com/ItsAlphaNeon/ReplyGPT/releases) page.
-3. Download the latest release of the plugin (`.plugin` file) from the Assets section.
+2. Download the `.plugin.js` file from the repository
 4. Move the downloaded `.plugin.js` file to the BetterDiscord plugins folder. The location of the folder depends on your operating system:
    - Windows: `%appdata%\betterdiscord\plugins`
    - macOS: `~/Library/Preferences/BetterDiscord/plugins`
