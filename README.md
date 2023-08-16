@@ -28,12 +28,14 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 ## Usage
 
 1. Once the plugin is enabled, you will see a few new buttons in your DMs. Enable any channels you want to have AutoPilot reply to.
-<!-- embed images -->
-![image](images/enable.png)
-![image](images/enabled.png)
+
+   <img src="images/enable.png" alt="Enable AutoPilot" width="400"/>
+   <img src="images/enabled.png" alt="Enabled AutoPilot" width="400"/>
 
 2. In order to use it, you must provide your OpenAI API key in the plugin settings. You can get your key [Here](https://platform.openai.com/account/api-keys)
-![image](images/Settings.png)
+
+   <img src="images/Settings.png" alt="AutoPilot Settings" width="400"/>
+
    - __Note: your OpenAI key isn't uploaded anywhere, and is kept on your local machine. Please be sure not to share this anywhere__
 4. Once you input your key, you can now toggle on or off AutoPilot next to the gift icon.
 5. Please note it is best to mess with settings to determine how accurate the AI will be replying for you.
@@ -46,4 +48,3 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 ## Contributing
 
 Contributions are welcome! If you find any bugs or want to suggest improvements, please or submit a pull request.
-
