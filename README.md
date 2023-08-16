@@ -45,6 +45,11 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 
 - This plugin is new, and has lots of undiscovered issues. Report any in the issues tab please.
 
+## Planned Features
+- Custom prompts
+- Expression styles
+- AutoPilot away messages
+
 ## Contributing
 
 Contributions are welcome! If you find any bugs or want to suggest improvements, please or submit a pull request.
