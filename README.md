@@ -45,7 +45,8 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 
 - Ticking off `Random Delay` in settings doesn't work properly.
 - AI can hallucinate answers occasionally, this may account for delayed response time until it gives a JSON reply properly
-- This plugin is new, and has lots of undiscovered issues. Report any in the issues tab please.
+- Channels with less than ~15 messages won't generate properly. this is being looked into
+This plugin is new, and has lots of undiscovered issues. Report any in the issues tab please.
 
 ## Planned Features
 - Custom prompts
