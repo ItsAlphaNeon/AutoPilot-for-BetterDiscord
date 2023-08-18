@@ -38,6 +38,9 @@ A BetterDiscord plugin that enhances your Discord experience by integrating the 
 
    - __Note: your OpenAI key isn't uploaded anywhere, and is kept on your local machine. Please be sure not to share this anywhere__
 4. Once you input your key, you can now toggle on or off AutoPilot next to the gift icon.
+
+<img src="images/Start.png" alt="Start AutoPilot" width="400"/>
+
 5. Please note it is best to mess with settings to determine how accurate the AI will be replying for you.
 
 
