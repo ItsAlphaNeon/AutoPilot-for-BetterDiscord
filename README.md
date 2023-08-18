@@ -2,6 +2,9 @@
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
+### Please Note:
+This is just a project for fun, as its more of an experiment / toy. Don't rely on this to give accurate responses, as its just using ChatGPT.
+
 A BetterDiscord plugin that enhances your Discord experience by integrating the ChatGPT / GPT3.5 model. It allows you to generate and send AI-powered replies to Discord DMs automatically.
 
 ## Features
