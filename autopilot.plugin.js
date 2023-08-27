@@ -2,7 +2,7 @@
  * @name Autopilot
  * @author AlphaNeon
  * @description A plugin that uses the OpenAI API to automatically reply to DM's you select. Very experimental, and just for fun.
- * @version 0.0.2
+ * @version 0.0.3
  */
 
 class APTools {
@@ -156,6 +156,12 @@ class Icons {
         </g>
       </svg>`;
 }
+
+class QuerySelectorPresets {
+  static TitleBar = "#app-mount > div.appAsidePanelWrapper-ev4hlp > div.notAppAsidePanel-3yzkgB > div.app-3xd6d0 > div > div.layers-OrUESM.layers-1YQhyW > div > div > div > div > div.chat-2ZfjoI > section > div > div.toolbar-3_r2xA";
+  static TypingBar = ".inner-NQg18Y > .buttons-uaqb-5";
+}
+
 module.exports = class Autopilot {
   constructor() {
     // Default settings
@@ -590,7 +596,7 @@ format: {
 
   // Function to attach button to the title bar
   attachUserManagerButton() {
-    let titleBar = document.querySelector(".title-31SJ6t > .toolbar-3_r2xA");
+    let titleBar = document.querySelector(QuerySelectorPresets.TitleBar);
     if (titleBar) {
       if (titleBar.querySelector("#autopilot_button")) {
         return; // Exit if button already exists
@@ -664,7 +670,7 @@ format: {
     }
   }
   attatchClearButton() {
-    let titleBar = document.querySelector(".title-31SJ6t > .toolbar-3_r2xA");
+    let titleBar = document.querySelector(QuerySelectorPresets.TitleBar);
 
     if (!titleBar || !titleBar.querySelector("#autopilot_button")) {
       return;
@@ -698,7 +704,7 @@ format: {
 
   attatchAutopilotButton() {
     let typingIconsBar = document.querySelector(
-      ".inner-NQg18Y > .buttons-uaqb-5"
+      QuerySelectorPresets.TypingIconsBar
     );
 
     if (typingIconsBar) {
