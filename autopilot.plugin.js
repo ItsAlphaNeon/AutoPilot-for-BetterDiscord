@@ -91,6 +91,28 @@ class APTools {
       return false;
     }
   }
+
+  static getCurrentChannelLastMessages(numberOfMessages) {
+    let messages = ZeresPluginLibrary.DiscordModules.MessageStore.getMessages(
+      APTools.getCurrentChannelId()
+    );
+    let messageArray = messages._array;
+    let lastMessages = [];
+    if (!messageArray || messageArray.length === 0) {
+      console.log("No messages found in channel");
+    }
+
+    for (
+      let i = Math.max(0, messageArray.length - numberOfMessages);
+      i < messageArray.length;
+      i++
+    ) {
+      let message = messageArray[i];
+      lastMessages.push(message.content);
+    }
+
+    return lastMessages;
+  }
 }
 
 class Icons {
@@ -157,11 +179,129 @@ class Icons {
       </svg>`;
 }
 
+class Presets {
+  static getPresets() {
+    return {
+      custom: Presets.custom(),
+      generic: Presets.generic(),
+      shy: Presets.shy(),
+      emo: Presets.emo(),
+      formal: Presets.formal(),
+      uwu: Presets.uwu(),
+    };
+  }
+  static generic() {
+    return `
+
+    The writing style is generic and lacks any distinctive or unique characteristics.
+    Sentences are typically structured using proper capitalization and punctuation.
+    There is a consistent usage of formal language and grammatical correctness.
+    Emphasis or specific emotions are not conveyed through repetition, ellipses, or doubled consonants.
+    The writing style demonstrates a balanced use of sentence lengths, varying between short and long sentences.
+    Proper nouns are capitalized, and pronouns are used with appropriate capitalization.
+    Contractions are used sparingly, and formal language is preferred over colloquial or informal language.
+    Negative emotions or doubts are not expressed directly, and optimism may be communicated through neutral or positive language.
+    Language used is more formal and avoids the use of slang or casual expressions.
+    There is a consistent and appropriate use of punctuation marks such as quotation marks, exclamation points, and question marks.
+    Sentences are complete and generally include a subject, verb, and object.
+    The writing style lacks hesitation or fragmented phrases, focusing on clear and concise language.
+    The writing style may include descriptive language and metaphorical expressions to enhance the communication.
+    Responses typically contain more elaboration and detail, providing further context or explanations.
+    The use of repetition is limited and serves a specific purpose, such as reinforcing key points or creating rhythm.
+    `;
+  }
+  static shy() {
+    return `
+
+    Lowercase letters are predominantly used throughout the writing style, even at the beginning of sentences.
+    Punctuation is often minimal and tends to be limited to basic punctuation marks such as periods and commas.
+    The use of ellipses (...) is common, suggesting hesitation or a quiet and reserved nature in speech.
+    Sentences tend to be shorter and more concise, reflecting a shyness to express thoughts and emotions openly.
+    Capitalization is used sparingly and inconsistently, with a preference for lowercase letters.
+    There is a tendency to avoid direct confrontation or assertiveness in the writing style, leading to softer language choices.
+    The writer often expresses self-doubt or lack of confidence in their statements or questions.
+    The writing style is characterized by a gentle and reserved tone, with a preference for a subtle and understated approach.
+    Simple explanations or responses are commonly given, without much elaboration or detail.
+    The writing style may include qualifiers or expressions of uncertainty (e.g., "I think," "maybe," "sort of").
+    The use of exclamation points is infrequent, suggesting a more reserved and cautious expression of enthusiasm or excitement.
+    Interruptions or pauses in speech are indicated through the use of ellipses or hesitating interjections.
+    Proper grammar and punctuation rules may be loosely followed, with a focus on capturing the writer's shy demeanor rather than adhering strictly to formal writing conventions.
+    Informal language and abbreviations are used sparingly, as the writer may prefer a more polite, indirect, and formal approach.
+    The writing style often emphasizes a quiet and introspective nature, with a tendency to prioritize subtlety and understatement over bold or assertive language.
+    `;
+  }
+
+  static emo() {
+    return `
+
+    Lowercase letters are consistently used throughout the writing, including at the beginning of sentences (e.g., no, not feeling good, i feel exhausted).
+    Proper punctuation is mostly used, though there might be occasional omissions (e.g., no, ?, ..).
+    Ellipses (...) are frequently used to convey pauses or a sense of emotional intensity.
+    The writing style is characterized by longer, descriptive sentences that explore emotions and feelings.
+    Capitalization is generally used for proper nouns, but not consistently for pronouns (e.g., i).
+    Emphasis is added to words or phrases by repeating vowels or consonants (e.g., ai, hh).
+    Contractions are present but sparingly used.
+    The writer tends to express negative emotions, sadness, or despair in their writing.
+    Informal language is used, reflecting a personal and intimate writing style (e.g., not feeling good, hang in there, what's up).
+    Sentences are generally complete but may focus more on emotive expressions rather than concrete information.
+    The writer often includes interjections or emotional outbursts within their writing (e.g., hh).
+    Punctuation is used informally, with a more artistic and expressive approach (e.g., ellipses, dashes).
+    The writing style tends to be introspective and self-reflective, exploring inner thoughts and emotions.
+    The writer may use evocative language, vivid metaphors, or poetic devices to convey their emotions.
+    Repetition of certain phrases or words creates a rhythm or lyrical quality in the writing, enhancing the emotional impact.
+    `;
+  }
+
+  static formal() {
+    return `
+    
+    Capitalization is used correctly for the beginning of sentences and proper nouns.
+    Proper punctuation, such as commas, periods, and exclamation points, is consistently used.
+    The writer tends to use complete sentences with well-defined subjects and verbs.
+    Emphasis is added through the use of italics or bold font rather than unconventional spelling or punctuation.
+    The writing style is characterized by a more sophisticated vocabulary and sentence structure.
+    The writer avoids contractions and instead uses complete words (e.g., "do not" instead of "don't").
+    Formal language is used, including respectful address (e.g., "Sir/Madam," "Dear").
+    The tone of the writing is polite, professional, and often neutral rather than emotive.
+    The writer uses appropriate transitions and logical organization to present their ideas.
+    Complex sentence structures, including subordination and coordination, are employed to convey nuanced thoughts.
+    Quotations are properly formatted with quotation marks and/or indentation.
+    The writing style maintains a consistent and appropriate register throughout.
+    The writer tends to provide elaboration and detail to support their arguments or claims.
+    The use of rhetorical devices, such as parallelism or antithesis, may be present to enhance persuasive writing.
+    The writer may employ more formal greetings and sign-offs in their communication (e.g., "Dear Sir/Madam," "Yours sincerely").
+
+    `;
+  }
+
+  static uwu() {
+    return `
+    Capitalization is heavily used for emphasis on certain words or phrases (e.g., UWU, SPARKLE DOG).
+    Exclamation points are frequently used to convey excitement and enthusiasm.
+    Emoticons, especially uwu, are inserted throughout the writing to add cuteness and express emotions (e.g., :3, >w<).
+    The use of repetition is prevalent to reinforce certain themes or ideas (e.g., uwu, sparkles, fluff).
+    Adjectives are often duplicated for emphasis and to showcase the sparkly nature (e.g., shiny shiny, floofy floof).
+    Magical and fantastical language is used to describe ordinary things (e.g., using "magical" instead of "amazing").
+    The writer may frequently reference puppies, kittens, rainbows, and other cute or magical elements.
+    Heart emoticons (<3) are sprinkled throughout the writing to convey love and affection.
+    The exclamation of "yay!" or "squee!" is used to express excitement or joy.
+    Words are intentionally misspelled or shortened for a cutesy effect (e.g., wuv instead of love, gud instead of good).
+    The writer often adds extra vowels, particularly in elongated words or phrases (e.g., flufffff, sparklesss).
+    Sensory descriptions, such as the use of words like "soft," "cuddly," or "glittering," are commonly used.
+    The writer may make references to unicorns, fairies, and other magical creatures.
+    The writing style tends to be overly affectionate, using terms like "huggles" or "snuggles."
+    Sentences are typically short and fragmented, reflecting a playful and whimsical tone.
+`;
+  }
+
+  static custom() {
+    return "custom";
+  }
+}
 class QuerySelectorPresets {
   static TitleBar = "#app-mount > div.appAsidePanelWrapper-ev4hlp > div.notAppAsidePanel-3yzkgB > div.app-3xd6d0 > div > div.layers-OrUESM.layers-1YQhyW > div > div > div > div > div.chat-2ZfjoI > section > div > div.toolbar-3_r2xA";
   static TypingBar = ".inner-NQg18Y > .buttons-uaqb-5";
 }
-
 module.exports = class Autopilot {
   constructor() {
     // Default settings
@@ -177,6 +317,10 @@ module.exports = class Autopilot {
       EnabledChannels: [],
       IsFirstRun: true,
       BlacklistedChannels: [],
+      WritingProfile: "",
+      SelectedProfile: "Custom",
+      ProfilesAvailable: Object.keys(Presets.getPresets()), // Array of preset names ("generic", "shy", etc.)
+      PresetValues: Presets.getPresets(), // Object of preset values
     };
 
     this.MessageStore = ZeresPluginLibrary.WebpackModules.getByProps(
@@ -242,6 +386,46 @@ module.exports = class Autopilot {
     this.saveSettings();
   }
 
+  async createWritingProfile(inputMessagesArray) {
+    if (inputMessagesArray.length == 0) {
+      BdApi.UI.showToast("Error: no_messages_found_in_array");
+      return;
+    }
+
+    this.Settings.WritingProfile = ""; // Clear the writing profile
+
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${this.Settings.OpenAIKey}`,
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: this.writingPrompt(inputMessagesArray),
+          },
+        ],
+      }),
+    });
+
+    if (!response.ok) {
+      BdApi.showConfirmationModal("OpenAI Error", "Error: " + response.status);
+      return;
+    }
+
+    this.Settings.WritingProfile = await response.messages[0].content;
+    if (!this.Settings.WritingProfile) {
+      // Success, show a notification
+      BdApi.showConfirmationModal(
+        "Autopilot",
+        "Autopilot has created a writing profile for you based on this conversation. To use it, change the profile to 'custom' in the plugin settings."
+      );
+    }
+  }
+
   async getReplyFromAI(inputMessagesArray) {
     let prompt = "";
     if (this.Settings.UseCustomPrompt) {
@@ -275,27 +459,29 @@ module.exports = class Autopilot {
     }
   }
 
-  DefaultPrompt(inputMessagesArray) {
-    // Assuming MessagesArray is a class property
-    // this.MessagesArray should be properly initialized before being used here.
+  getWritingStyle() {
+    if (this.Settings.SelectedProfile == "Custom") {
+      if (this.Settings.WritingProfile == "") {
+        // empty writing profile, warn
+        BdApi.showConfirmationModal(
+          "Autopilot",
+          "You have selected the custom profile, but have not trained a writing profile. Train one by clicking the 'Train Writing Style' button in a DM. Choose a style in settings if you don't want to train a custom profile."
+        );
+        this.stopAutopilot();
+        return;
+      }
+      return this.Settings.WritingProfile;
+    } else {
+      return this.Settings.PresetValues[this.Settings.SelectedProfile];
+    }
+  }
 
+  DefaultPrompt(inputMessagesArray) {
     const output = `
 You are a Discord Reply AI designed to automatically reply to messages 
-in the style of the user ${
-      this.UserStore.getCurrentUser().username
-    }. You will be given the last few messages 
-between the local user ${
-      this.UserStore.getCurrentUser().username
-    }, (who you are replying as) and the remote 
-user (who you are replying to). You will then be asked to reply 
-to the remote user in the style of the local user. Remember not 
-to say anything that would give away that you are an AI. 
-You are doing your best to be the user you are replying as.
-Do not reply in more than 1 sentence. Keep your answers short and generic.
-make sure to use lazy punctuation and grammar.
-do not capitalize your words or sentances. only reply with one phrase.
+in the following style:
 
-ex. "whats up" is a good response. "Whats up?" is not.
+${this.getWritingStyle()}
 
 
 
@@ -319,6 +505,30 @@ format: {
 
 
         `;
+    console.log(output);
+    return output;
+  }
+
+  writingPrompt(inputMessagesArray) {
+    const output = `
+    Please observe the following conversation between the local user (${
+      this.UserStore.getCurrentUser().username
+    }) and a remote user.
+Make a comprehensive llist of notes about the writing style of (${
+      this.UserStore.getCurrentUser().username
+    }) that someone could use to recreate their writing style.
+
+DO NOT DESCRIBE THE REMOTE USER
+
+Be as descriptive as possible, and include notes about punctuation and capitalization usage.
+
+Provide 15 bullet points about (${
+      this.UserStore.getCurrentUser().username
+    })s writing style
+
+${inputMessagesArray.join("\n")}
+`;
+
     console.log(output);
     return output;
   }
@@ -487,6 +697,14 @@ format: {
       "number",
       this.Settings.MessagesToRead
     );
+    const SelectedProfile = this.buildSetting(
+      "Selected Profile",
+      "SelectedProfile",
+      "dropdown",
+      this.Settings.SelectedProfile,
+      this.handleDropdownChange.bind(this),
+      this.Settings.ProfilesAvailable
+    );
     const ResetSettingsButton = this.buildSetting(
       "Reset Settings",
       "ResetSettings",
@@ -506,29 +724,54 @@ format: {
       // CustomPromptSetting,
       // UseCustomPromptSetting,
       MessagesToReadSetting,
+      SelectedProfile,
       ResetSettingsButton
     );
 
     return settingsPanel;
   }
 
-  buildSetting(text, key, type, value, callback = () => {}) {
+  handleDropdownChange(value) {
+    this.Settings.SelectedProfile = value;
+    this.Settings.WritingProfile = this.Settings.PresetValues[value];
+  }
+
+  buildSetting(text, key, type, value, callback = () => {}, options = []) {
     const setting = Object.assign(document.createElement("div"), {
       className: "setting",
     });
-    const input = Object.assign(document.createElement("input"), {
-      type: type,
-      name: key,
-      value: value,
-      id: key,
-    });
+
+    let input;
+
+    if (type === "dropdown") {
+      input = document.createElement("select");
+      input.name = key;
+      input.id = key;
+
+      for (let val of options) {
+        let option = document.createElement("option");
+        option.value = val;
+        option.text = val;
+        if (val == value) option.selected = true;
+        input.appendChild(option);
+      }
+    } else {
+      input = Object.assign(document.createElement("input"), {
+        type: type,
+        name: key,
+        value: value,
+        id: key,
+      });
+
+      if (type === "checkbox" && value) input.checked = true;
+    }
+
     const label = Object.assign(document.createElement("span"), {
       textContent: text,
     });
 
     let switchElement;
     if (type === "checkbox") {
-      if (value) input.checked = true;
       switchElement = Object.assign(document.createElement("label"), {
         className: "switch",
         htmlFor: key,
@@ -599,6 +842,7 @@ format: {
     let titleBar = document.querySelector(QuerySelectorPresets.TitleBar);
     if (titleBar) {
       if (titleBar.querySelector("#autopilot_button")) {
+        console.log("already exists")
         return; // Exit if button already exists
       }
       let currentRecipient = APTools.getDisplayNameFromChannel(
@@ -702,9 +946,33 @@ format: {
     titleBar.insertBefore(clearButton, titleBar.firstChild);
   }
 
+  attatchLearnStyleButton() {
+    let titleBar = document.querySelector(QuerySelectorPresets.TitleBar);
+
+    if (!titleBar || !titleBar.querySelector("#autopilot_button")) {
+      return;
+    }
+
+    if (titleBar.querySelector("#LearnStyle_button")) {
+      return;
+    }
+
+    let learnStyleButton = document.createElement("button");
+    learnStyleButton.id = "LearnStyle_button";
+    learnStyleButton.classList.add("ClearButton");
+
+    learnStyleButton.textContent = "Train Writing Style";
+
+    learnStyleButton.addEventListener("click", () => {
+      this.createWritingProfile(APTools.getCurrentChannelLastMessages());
+    });
+
+    titleBar.insertBefore(learnStyleButton, titleBar.firstChild);
+  }
+
   attatchAutopilotButton() {
     let typingIconsBar = document.querySelector(
-      QuerySelectorPresets.TypingIconsBar
+      ".inner-NQg18Y > .buttons-uaqb-5"
     );
 
     if (typingIconsBar) {
@@ -761,6 +1029,7 @@ format: {
           this.attachUserManagerButton();
           this.attatchAutopilotButton();
           this.attatchClearButton();
+          this.attatchLearnStyleButton();
         }
       });
     });
@@ -786,6 +1055,16 @@ format: {
       );
       return;
     }
+
+    if (
+      this.Settings.WritingProfile == "" &&
+      this.Settings.SelectedProfile == "" //TODO: Add check for custom profile
+    ) {
+      BdApi.UI.showNotice(
+        "You have Custom selected as your writing profile, but you haven't trained a writing style yet. Please train a writing style or select a different profile in settings."
+      );
+      return;
+    }
     if (this.autopilotActive == true) {
       this.autopilotActive = false;
       this.stopAutopilot();
@@ -806,6 +1085,22 @@ format: {
         this.autopilotActive = false;
         this.stopAutopilot();
         return;
+      }
+
+      if (this.Settings.SelectedProfile == "Custom") {
+        if (this.Settings.WritingProfile == "") {
+          // no custom profile, warn user and stop autopilot
+          BdApi.showToast("No custom profile selected, stopping autopilot.");
+          this.stopAutopilot();
+          return;
+        } else if (this.Settings.SelectedProfile == "") {
+          BdApi.UI.showConfirmationModal(
+            "Error",
+            "No writing profile selected. Please choose a writing profile in the settings panel."
+          );
+          this.stopAutopilot();
+          return;
+        }
       }
       // get the current length of the channels array
       let channelsArrayLength = this.Settings.EnabledChannels.length;
@@ -831,7 +1126,6 @@ format: {
           }
         }
       }
-
       // Add a delay here to avoid high CPU usage
       await new Promise((resolve) =>
         setTimeout(resolve, this.getRandomDelay())
@@ -839,7 +1133,6 @@ format: {
     }
     console.log("Autopilot stopped!");
   }
-
   stopAutopilot() {
     let typingIconsBar = document.querySelector(
       ".inner-NQg18Y > .buttons-uaqb-5"
