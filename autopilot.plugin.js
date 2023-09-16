@@ -203,83 +203,79 @@ module.exports = class Autopilot {
     this.MessagesArray = [];
   }
 
-  checkForUpdates() {
-    const githubFileURL = "https://raw.githubusercontent.com/ItsAlphaNeon/AutoPilot-for-BetterDiscord/main/autopilot.plugin.js";
-    const localVersion = this.pluginVersion;
-
-    try {
-      fetch(githubFileURL)
-        .then((response) => response.text())
-        .then((text) => {
-          let remoteVersion = text.match(/@version\s+(\S+)/)[1];
-          if (localVersion !== remoteVersion) {
-            BdApi.UI.showConfirmationModal(
-              "Autopilot",
-              "A new version of Autopilot is available! Would you like to update now?",
-              {
-                confirmText: "Update",
-                cancelText: "No Thanks",
-                onConfirm: () => {
-                  // Download the new version
-                  BdApi.showToast("Autopilot is updating...", { type: "info" });
-                
-                  fetch(githubFileURL)
-                    .then((response) => response.text())
-                    .then((text) => {
-                      // Write the new version to the local file
-                      const fs = require("fs");
-                      const path = require("path");
-                
-                      const filePath = BdApi.Plugins.folder + "/autopilot.plugin.js";
-                      fs.writeFile(filePath, text, (err) => {
-                        if (err) {
-                          console.error(err);
-                          BdApi.showToast("Failed to update Autopilot", { type: "error" });
-                        } else {
-                          BdApi.showToast("Autopilot has been updated", { type: "success" });
-                          BdApi.showConfirmationModal(
-                            "Update Successful",
-                            "Please reload Discord to apply the changes.",
-                            {
-                              confirmText: "Reload",
-                              onCancel: () => {
-                                console.log("Discord reload canceled");
-                              },
-                              onConfirm: () => {
-                                // Reload Discord after the update
-                                BdApi.Plugins.disable(BdApi.Plugins.get("Autopilot").name);
-                                BdApi.Plugins.enable(BdApi.Plugins.get("Autopilot").name);
-                              },
-                            }
-                          );
-                        }
-                      });
-                    })
-                    .catch((error) => {
-                      console.log(error);
-                    });
-                },
-                
-                onCancel: () => {
-                  // Don't download the new version
-                  BdApi.showToast("Autopilot will not be updated.", {
-                    type: "info",
-                  
-                }
-              );
-            }
-          }
-            )
-          }
-          else {
-            console.log("Autopilot is up to date!"); // debug
-          }
-        });
-    }
-    catch (error) {
-      console.log(error);
-    }
-  }
+  // async checkForUpdates() {
+  //   const githubFileURL = "https://raw.githubusercontent.com/ItsAlphaNeon/AutoPilot-for-BetterDiscord/main/autopilot.plugin.js";
+  //   const localVersion = this.pluginVersion;
+  
+  //   try {
+  //     const response = await fetch(githubFileURL);
+  //     const text = await response.text();
+  //     let remoteVersion = text.match(/@version\s+(\S+)/)[1];
+  //     console.log("Local version:", localVersion); // debug
+  //     if (!remoteVersion) {
+  //       console.log("Failed to get remote version"); // debug
+  //       return;
+  //     }
+  //     if (localVersion !== remoteVersion) {
+  //       BdApi.UI.showConfirmationModal(
+  //         "Autopilot",
+  //         "A new version of Autopilot is available! Would you like to update now?",
+  //         {
+  //           confirmText: "Update",
+  //           cancelText: "No Thanks",
+  //           onConfirm: async () => {
+  //             // Download the new version
+  //             BdApi.showToast("Autopilot is updating...", { type: "info" });
+  
+  //             const response = await fetch(githubFileURL);
+  //             const text = await response.text();
+  
+  //             // Write the new version to the local file
+  //             const fs = require("fs");
+  //             const path = require("path");
+  //             const filePath = BdApi.Plugins.folder + "/autopilot.plugin.js";
+  
+  //             fs.writeFile(filePath, text, (err) => {
+  //               if (err) {
+  //                 console.error(err);
+  //                 BdApi.showToast("Failed to update Autopilot", { type: "error" });
+  //               } else {
+  //                 BdApi.showToast("Autopilot has been updated", { type: "success" });
+  //                 BdApi.showConfirmationModal(
+  //                   "Update Successful",
+  //                   "Please reload Discord to apply the changes.",
+  //                   {
+  //                     confirmText: "Reload",
+  //                     onCancel: () => {
+  //                       console.log("Discord reload canceled");
+  //                     },
+  //                     onConfirm: () => {
+  //                       // Reload Discord after the update
+  //                       BdApi.Plugins.disable(BdApi.Plugins.get("Autopilot").name);
+  //                       BdApi.Plugins.enable(BdApi.Plugins.get("Autopilot").name);
+  //                     },
+  //                   }
+  //                 );
+  //               }
+  //             });
+  //           },
+  
+  //           onCancel: () => {
+  //             // Don't download the new version
+  //             BdApi.showToast("Autopilot will not be updated.", {
+  //               type: "info",
+  //             });
+  //           },
+  //         }
+  //       );
+  //     } else {
+  //       console.log("Autopilot is up to date!"); // debug
+  //     }
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // }
+  
 
   start() {
     // Load settings if they don't exist
@@ -289,7 +285,7 @@ module.exports = class Autopilot {
     this.loadSettings();
 
     // Check for updates
-    this.checkForUpdates();
+    // this.checkForUpdates();
 
     // Check if first run
     if (this.Settings.IsFirstRun) {
