@@ -212,7 +212,7 @@ module.exports = class Autopilot {
         .then((response) => response.text())
         .then((text) => {
           let remoteVersion = text.match(/@version\s+(\S+)/)[1];
-          if (localVersion !== remoteVersion || localVersion < remoteVersion) {
+          if (localVersion !== remoteVersion) {
             BdApi.UI.showConfirmationModal(
               "Autopilot",
               "A new version of Autopilot is available! Would you like to update now?",
