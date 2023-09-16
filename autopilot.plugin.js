@@ -2,7 +2,7 @@
  * @name Autopilot
  * @author AlphaNeon
  * @description A plugin that uses the OpenAI API to automatically reply to DM's you select. Very experimental, and just for fun.
- * @version 0.0.3
+ * @version 0.0.4
  */
 
 class APTools {
@@ -159,7 +159,7 @@ class Icons {
 
 class QuerySelectorPresets {
   static TitleBar = "#app-mount > div.appAsidePanelWrapper-ev4hlp > div.notAppAsidePanel-3yzkgB > div.app-3xd6d0 > div > div.layers-OrUESM.layers-1YQhyW > div > div > div > div > div.chat-2ZfjoI > section > div > div.toolbar-3_r2xA";
-  static TypingBar = ".inner-NQg18Y > .buttons-uaqb-5";
+  static TypingBar = "#app-mount > div.appAsidePanelWrapper-ev4hlp > div.notAppAsidePanel-3yzkgB > div.app-3xd6d0 > div > div.layers-OrUESM.layers-1YQhyW > div > div > div > div > div.chat-2ZfjoI > div.content-1jQy2l > main > form > div > div > div > div.buttons-uaqb-5";
 }
 
 module.exports = class Autopilot {
@@ -704,13 +704,15 @@ format: {
 
   attatchAutopilotButton() {
     let typingIconsBar = document.querySelector(
-      QuerySelectorPresets.TypingIconsBar
+      QuerySelectorPresets.TypingBar
     );
 
     if (typingIconsBar) {
       if (typingIconsBar.querySelector("#autopilot_button")) {
+        console.log("Button already exists");
         return; // Exit if button already exists
       }
+      console.log("Button doesn't exist, creating it.")
 
       let autopilotButton = document.createElement("button");
       autopilotButton.id = "autopilot_button";
