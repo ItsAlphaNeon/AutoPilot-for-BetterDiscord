@@ -2,7 +2,7 @@
  * @name Autopilot
  * @author AlphaNeon
  * @description A plugin that uses the OpenAI API to automatically reply to DM's you select. Very experimental, and just for fun.
- * @version 0.0.5
+ * @version 0.0.6
  */
 
 class APTools {
