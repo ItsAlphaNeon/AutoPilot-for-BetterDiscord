@@ -158,8 +158,8 @@ class Icons {
 }
 
 class QuerySelectorPresets {
-  static TitleBar = "#app-mount > div.appAsidePanelWrapper-ev4hlp > div.notAppAsidePanel-3yzkgB > div.app-3xd6d0 > div > div.layers-OrUESM.layers-1YQhyW > div > div > div > div > div.chat-2ZfjoI > section > div > div.toolbar-3_r2xA";
-  static TypingBar = "#app-mount > div.appAsidePanelWrapper-ev4hlp > div.notAppAsidePanel-3yzkgB > div.app-3xd6d0 > div > div.layers-OrUESM.layers-1YQhyW > div > div > div > div > div.chat-2ZfjoI > div.content-1jQy2l > main > form > div > div > div > div.buttons-uaqb-5";
+  static TitleBar = "#app-mount.appMount_fae9dd > div.appAsidePanelWrapper__714a6 > div.notAppAsidePanel__9d124 > div.app_b1f720 > div.app_de4237 > div.layers__1c917.layers_a23c37 > div.layer__2efaa.baseLayer__8fda3 > div.container__037ed > div.base__3e6af > div.content__4bf10 > div.chat__52833 > section.title_b7d661.container__11d72.themed_b152d4 > div.upperContainer__993ba > div.toolbar__88c63";
+  static TypingBar = "#app-mount.appMount_fae9dd > div.appAsidePanelWrapper__714a6 > div.notAppAsidePanel__9d124 > div.app_b1f720 > div.app_de4237 > div.layers__1c917.layers_a23c37 > div.layer__2efaa.baseLayer__8fda3 > div.container__037ed > div.base__3e6af > div.content__4bf10 > div.chat__52833 > div.content__1a4fe > div.container__93316 > div.chatContainer__23434 > main.chatContent__5dca8 > form.form__13a2c > div.channelTextArea__2e60f.channelTextArea__56a36 > div.scrollableContainer__33e06.themedBackground__6b1b6 > div.inner__9fd0b.sansAttachButton__996a4 > div.buttons_ce5b56";
 }
 
 module.exports = class Autopilot {
@@ -198,7 +198,7 @@ module.exports = class Autopilot {
       "getUser"
     );
 
-    this.MessageActions = BdApi.Webpack.getByKeys("editMessage");
+    this.MessageActions = BdApi.Webpack.getByKeys("editMessage", "jumpToMessage")
 
     this.MessagesArray = [];
   }
