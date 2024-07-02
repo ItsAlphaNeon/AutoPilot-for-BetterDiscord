@@ -1,3 +1,5 @@
+# This project is archived temporarily until I can find the time to completely rework and update it to the latest version of Discord. Sorry for the inconvienece.
+
 # AutoPilot - Your AI AutoPilot for Discord
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
